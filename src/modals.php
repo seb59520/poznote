@@ -282,6 +282,13 @@
                             <p>Checklist with checkboxes for tasks and items</p>
                         </div>
                     </div>
+                    <div class="create-note-option" data-type="ai" onclick="selectCreateType('ai')" id="aiCreateOption" style="display: none;">
+                        <i class="fa-robot"></i>
+                        <div>
+                            <span>Note avec IA</span>
+                            <p>Créer une note structurée à partir d'un prompt IA</p>
+                        </div>
+                    </div>
                     <div class="create-note-option" data-type="subfolder" onclick="selectCreateType('subfolder')" id="subfolderOption" style="display: none;">
                         <i class="fal fa-folder-plus"></i>
                         <div>

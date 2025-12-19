@@ -130,8 +130,9 @@ try {
         }
         
         // Delete physical folder
-    $wsSegment = $workspace ? ('workspace_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($workspace))) : 'workspace_default';
-    $folder_path = __DIR__ . '/entries/' . $wsSegment . '/' . $folder_name;
+        $entriesRoot = dirname(__DIR__) . '/entries';
+        $wsSegment = $workspace ? ('workspace_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($workspace))) : 'workspace_default';
+        $folder_path = $entriesRoot . '/' . $wsSegment . '/' . $folder_name;
         $folder_deleted = false;
         
         if (is_dir($folder_path)) {
@@ -147,7 +148,6 @@ try {
         }
         
         // Commit transaction
-        $con->commit();
         $con->commit();
         
         http_response_code(200);
@@ -167,7 +167,6 @@ try {
     } catch (Exception $e) {
         // Rollback transaction on error
         $con->rollback();
-        $con->commit();
         throw $e;
     }
     

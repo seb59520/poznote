@@ -159,6 +159,7 @@ body {
 .fa-code::before { content: "\f121"; }
 .fa-coffee::before { content: "\f0f4"; }
 .fa-lightbulb::before { content: "\f0eb"; }
+.fa-robot::before { content: "\f544"; }
 
 .fa-arrow-left,
 .fa-layer-group,
@@ -172,7 +173,8 @@ body {
 .fa-code-branch,
 .fa-code,
 .fa-coffee,
-.fa-lightbulb {
+.fa-lightbulb,
+.fa-robot {
     font-family: "Font Awesome 5 Pro";
     font-weight: 300;
     font-style: normal;

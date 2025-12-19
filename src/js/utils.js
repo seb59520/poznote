@@ -1370,6 +1370,10 @@ function showCreateModal(folderId = null, folderName = null) {
     var modalTitle = document.getElementById('createModalTitle');
     var otherSection = document.getElementById('otherSection');
     var subfolderOption = document.getElementById('subfolderOption');
+    var aiCreateOption = document.getElementById('aiCreateOption');
+    
+    // Vérifier si l'IA est disponible
+    var aiAvailable = typeof window.AIAssistant !== 'undefined';
     
     if (isCreatingInFolder) {
         modalTitle.textContent = 'Create in ' + (folderName || 'folder');
@@ -1378,10 +1382,18 @@ function showCreateModal(folderId = null, folderName = null) {
         if (subfolderOption) {
             subfolderOption.style.display = 'flex';
         }
+        // Afficher l'option IA si disponible
+        if (aiCreateOption) {
+            aiCreateOption.style.display = aiAvailable ? 'flex' : 'none';
+        }
     } else {
         modalTitle.textContent = 'Create';
         if (otherSection) otherSection.style.display = 'block';
         if (subfolderOption) subfolderOption.style.display = 'none';
+        // Afficher l'option IA si disponible
+        if (aiCreateOption) {
+            aiCreateOption.style.display = aiAvailable ? 'flex' : 'none';
+        }
     }
     
     // Reset selection
@@ -1432,6 +1444,9 @@ function executeCreateAction() {
             break;
         case 'list':
             createTaskListNoteInUtils();
+            break;
+        case 'ai':
+            createAINote();
             break;
         case 'folder':
             newFolder();
@@ -1491,6 +1506,69 @@ function createHtmlNote() {
             window.open('api_insert_new.php', '_blank');
         }
     }
+}
+
+function createAINote() {
+    if (typeof window.AIAssistant === 'undefined') {
+        if (typeof showNotificationPopup === 'function') {
+            showNotificationPopup('Les fonctionnalités IA ne sont pas disponibles. Vérifiez qu\'elles sont activées dans Settings.', 'error');
+        } else {
+            alert('Les fonctionnalités IA ne sont pas disponibles. Vérifiez qu\'elles sont activées dans Settings.');
+        }
+        return;
+    }
+    
+    // Demander le prompt (utiliser window.prompt pour éviter le conflit)
+    const userPrompt = window.prompt('Quel type de note voulez-vous créer avec l\'IA ?\n\nExemples:\n- Plan de projet migration cloud\n- Compte-rendu de réunion\n- Liste de tâches pour déménagement\n- Brainstorming idées produit\n\nVotre prompt:');
+    if (!userPrompt || !userPrompt.trim()) {
+        return;
+    }
+    
+    // Demander le type (optionnel)
+    const typeChoice = window.prompt('Type de note:\n1. structured (par défaut)\n2. meeting (réunion)\n3. project (projet)\n4. checklist (liste de tâches)\n5. summary (résumé)\n6. brainstorm (brainstorming)\n\nChoisissez (1-6) ou laissez vide:', '1');
+    const typeMap = {
+        '1': 'structured',
+        '2': 'meeting',
+        '3': 'project',
+        '4': 'checklist',
+        '5': 'summary',
+        '6': 'brainstorm'
+    };
+    const type = typeMap[typeChoice] || 'structured';
+    
+    // Afficher un loading
+    const loadingMessage = document.createElement('div');
+    loadingMessage.id = 'ai-create-loading';
+    loadingMessage.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; text-align: center;';
+    loadingMessage.innerHTML = '<div style="margin-bottom: 10px;">⏳</div><div>Création de la note avec IA...</div>';
+    document.body.appendChild(loadingMessage);
+    
+    // Créer la note
+    window.AIAssistant.createNoteFromPrompt(userPrompt.trim(), {
+        type: type,
+        workspace: window.selectedWorkspace || 'Poznote',
+        folderId: targetFolderId || window.selectedFolderId || null,
+        folderName: targetFolderName || window.selectedFolder || null
+    })
+    .then(function(result) {
+        loadingMessage.remove();
+        
+        // Rediriger vers la nouvelle note
+        const workspace = encodeURIComponent(result.workspace || window.selectedWorkspace || 'Poznote');
+        window.location.href = 'index.php?workspace=' + workspace + '&note=' + result.note_id + '&scroll=1';
+        
+        if (typeof showNotificationPopup === 'function') {
+            showNotificationPopup('Note créée avec succès !', 'success');
+        }
+    })
+    .catch(function(error) {
+        loadingMessage.remove();
+        if (typeof showNotificationPopup === 'function') {
+            showNotificationPopup('Erreur: ' + error.message, 'error');
+        } else {
+            alert('Erreur lors de la création de la note: ' + error.message);
+        }
+    });
 }
 
 function createTaskListNoteInUtils() {

@@ -151,6 +151,16 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
                     <h3>Support Developer</h3>
                 </div>
             </div>
+
+            <!-- AI Features -->
+            <div class="settings-card" onclick="showAISettings();">
+                <div class="settings-card-icon">
+                    <i class="fa-robot"></i>
+                </div>
+                <div class="settings-card-content">
+                    <h3>AI Features <span id="ai-status-badge" class="setting-status">loading...</span></h3>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -163,6 +173,7 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
     <script src="js/ui.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/font-size-settings.js"></script>
+    <script src="js/ai-settings.js"></script>
     
     <script>
         // Update Back to Notes link with workspace from localStorage
