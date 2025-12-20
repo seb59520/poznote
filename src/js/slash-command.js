@@ -587,6 +587,16 @@
                     window.openNoteReferenceModal();
                 }
             }
+        },
+        {
+            id: 'collapsible',
+            icon: 'fa-chevron-down',
+            label: 'Section dépliable',
+            action: function () {
+                if (typeof window.insertCollapsibleSection === 'function') {
+                    window.insertCollapsibleSection();
+                }
+            }
         }
     ];
 

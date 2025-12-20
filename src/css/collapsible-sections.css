@@ -1,0 +1,144 @@
+/* Collapsible Sections (Notes dépliables) Styles */
+
+.collapsible-section {
+    margin: 16px 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.collapsible-section:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #ffffff;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.collapsible-header:hover {
+    background: #f8fafc;
+}
+
+.collapsible-icon {
+    display: inline-block;
+    width: 20px;
+    margin-right: 12px;
+    font-size: 12px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.collapsible-title {
+    flex: 1;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 15px;
+    outline: none;
+    min-height: 1.2em;
+}
+
+.collapsible-title:empty:before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.collapsible-title:focus {
+    color: #0b4da6;
+}
+
+.collapsible-content {
+    padding: 0;
+    background: #ffffff;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.collapsible-body {
+    padding: 16px;
+    min-height: 40px;
+    outline: none;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.collapsible-body:empty:before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.collapsible-body:focus {
+    outline: none;
+}
+
+.collapsible-body p {
+    margin: 0 0 8px 0;
+}
+
+.collapsible-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .collapsible-section {
+        border-color: #334155;
+        background: #1e293b;
+    }
+
+    .collapsible-header {
+        background: #0f172a;
+        border-bottom-color: #334155;
+    }
+
+    .collapsible-header:hover {
+        background: #1e293b;
+    }
+
+    .collapsible-icon {
+        color: #94a3b8;
+    }
+
+    .collapsible-title {
+        color: #e2e8f0;
+    }
+
+    .collapsible-title:empty:before {
+        color: #64748b;
+    }
+
+    .collapsible-content {
+        background: #0f172a;
+    }
+
+    .collapsible-body {
+        color: #cbd5e1;
+    }
+
+    .collapsible-body:empty:before {
+        color: #64748b;
+    }
+}
+
