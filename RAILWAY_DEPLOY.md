@@ -140,6 +140,34 @@ Si vous voyez "erreur réseau" ou que l'application n'est pas accessible :
    - Dans Railway, cliquez sur "Deployments" → "Redeploy"
    - Attendez la fin du redéploiement
 
+### Erreur "This error appears to be caused by the application"
+
+Si vous voyez cette erreur sur l'URL Railway :
+
+1. **Vérifiez le Target Port dans Railway** :
+   - Allez dans Settings → Networking → Public Networking
+   - Cliquez sur l'icône d'édition (✏️) à côté de votre domaine
+   - Vérifiez que le Target Port correspond au port sur lequel nginx écoute
+   - Si Railway a fourni le port 8080, le Target Port doit être 8080
+   - Si le Target Port est incorrect, modifiez-le et sauvegardez
+
+2. **Vérifiez les logs Railway pour les erreurs PHP** :
+   - Dans Railway → Service → Deployments → View Logs
+   - Cherchez les erreurs PHP (Fatal error, Warning, etc.)
+   - Vérifiez que le répertoire `/var/www/html/data` existe et a les bonnes permissions
+
+3. **Vérifiez que les fichiers sont présents** :
+   - Dans les logs, cherchez "index.php not found" ou des erreurs de permissions
+   - Le script `init.sh` vérifie maintenant automatiquement la présence des fichiers
+
+4. **Vérifiez les permissions** :
+   - Dans les logs, cherchez "Final permissions check"
+   - Le répertoire `/var/www/html/data` doit être accessible en écriture par www-data
+
+5. **Testez la configuration nginx** :
+   - Dans les logs, cherchez "Nginx configuration is valid"
+   - Si vous voyez "ERROR: Nginx configuration is invalid!", il y a un problème de configuration
+
 ### L'application ne démarre pas
 
 1. Vérifiez les logs Railway : Dans Railway → Service → Deployments → View Logs
