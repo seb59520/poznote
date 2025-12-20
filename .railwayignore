@@ -1,0 +1,12 @@
+# Fichiers à ignorer lors du déploiement Railway
+.env
+.env.local
+data/
+*.log
+.git/
+.github/
+docker-compose*.yml
+backup-*.sh
+*.md
+!README.md
+
