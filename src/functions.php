@@ -771,6 +771,3 @@ function getFolderPath($folder_id, $con) {
     
     return !empty($path) ? implode('/', $path) : 'Default';
 }
-?>
-
-?>

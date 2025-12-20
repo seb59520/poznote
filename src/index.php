@@ -207,9 +207,12 @@ $body_classes = trim($extra_body_classes);
     <script>
     // Global error handler to catch all JavaScript errors
     window.addEventListener('error', function(event) {
+        const errorMessage = event.message || '(null)';
+        const errorFilename = event.filename || '(unknown file)';
+        
         console.error('JavaScript Error caught:', {
-            message: event.message,
-            filename: event.filename,
+            message: errorMessage,
+            filename: errorFilename,
             lineno: event.lineno,
             colno: event.colno,
             error: event.error,
@@ -217,7 +220,7 @@ $body_classes = trim($extra_body_classes);
         });
         
         // Specific handling for syntax errors that might prevent settings from working
-        if (event.message.includes('Unexpected end of input') || event.message.includes('SyntaxError')) {
+        if (errorMessage.includes('Unexpected end of input') || errorMessage.includes('SyntaxError')) {
             console.warn('Syntax error detected - this may prevent display settings from working properly');
         }
         
@@ -225,31 +228,55 @@ $body_classes = trim($extra_body_classes);
         try {
             const errorInfo = {
                 timestamp: new Date().toISOString(),
-                message: event.message,
-                filename: event.filename,
-                lineno: event.lineno,
-                colno: event.colno,
+                message: errorMessage,
+                filename: errorFilename,
+                lineno: event.lineno || 0,
+                colno: event.colno || 0,
                 stack: event.error ? event.error.stack : 'No stack trace'
             };
             sessionStorage.setItem('lastJSError', JSON.stringify(errorInfo));
+            
+            // Show user-friendly error message on iPad/Safari for critical errors
+            if (errorMessage.includes('null') || errorMessage.includes('undefined')) {
+                if (typeof showNotificationPopup === 'function') {
+                    showNotificationPopup('Une erreur est survenue. Veuillez rafraîchir la page.', 'error');
+                } else if (typeof window.modalAlert !== 'undefined' && window.modalAlert.alert) {
+                    window.modalAlert.alert('Une erreur est survenue. Veuillez rafraîchir la page.', 'error', 'Erreur');
+                }
+            }
         } catch (e) {
             // Ignore storage errors
+            console.error('Error handling JavaScript error:', e);
         }
     });
     
     // Catch unhandled promise rejections
     window.addEventListener('unhandledrejection', function(event) {
         console.error('Unhandled Promise Rejection:', event.reason);
+        
+        // Prevent default browser error handling
+        event.preventDefault();
+        
         try {
+            const reason = event.reason;
+            const reasonStr = reason ? (reason.toString ? reason.toString() : String(reason)) : '(null)';
             const errorInfo = {
                 timestamp: new Date().toISOString(),
                 type: 'Promise Rejection',
-                reason: event.reason.toString(),
-                stack: event.reason.stack || 'No stack trace'
+                reason: reasonStr,
+                stack: (reason && reason.stack) ? reason.stack : 'No stack trace'
             };
             sessionStorage.setItem('lastPromiseError', JSON.stringify(errorInfo));
+            
+            // Show user-friendly error message on iPad/Safari
+            if (typeof showNotificationPopup === 'function') {
+                showNotificationPopup('Une erreur est survenue. Veuillez rafraîchir la page.', 'error');
+            } else if (typeof window.modalAlert !== 'undefined' && window.modalAlert.alert) {
+                window.modalAlert.alert('Une erreur est survenue. Veuillez rafraîchir la page.', 'error', 'Erreur');
+            }
         } catch (e) {
             // Ignore storage errors
+            console.error('Error handling promise rejection:', e);
         }
     });
     
