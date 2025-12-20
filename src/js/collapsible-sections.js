@@ -26,10 +26,14 @@
 
         // Create the collapsible section HTML structure
         const sectionHTML = `
-            <div class="collapsible-section" data-section-id="${sectionId}">
-                <div class="collapsible-header" onclick="toggleCollapsibleSection('${sectionId}')">
+            <div class="collapsible-section collapsed" data-section-id="${sectionId}">
+                <div class="collapsible-header" onclick="toggleCollapsibleSection('${sectionId}', event)">
                     <span class="collapsible-icon" id="icon-${sectionId}">▶</span>
                     <span class="collapsible-title" contenteditable="true" data-placeholder="Titre de la section">${defaultTitle}</span>
+                    <div class="collapsible-actions">
+                        <button class="collapsible-action-btn" onclick="duplicateCollapsibleSection('${sectionId}')" title="Dupliquer">📋</button>
+                        <button class="collapsible-action-btn" onclick="deleteCollapsibleSection('${sectionId}')" title="Supprimer">🗑️</button>
+                    </div>
                 </div>
                 <div class="collapsible-content" id="content-${sectionId}" style="display: none;">
                     <div class="collapsible-body" contenteditable="true" data-placeholder="Contenu de la section...">
@@ -76,31 +80,186 @@
     /**
      * Toggle a collapsible section (open/close)
      */
-    window.toggleCollapsibleSection = function(sectionId) {
+    window.toggleCollapsibleSection = function(sectionId, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        const section = document.querySelector(`[data-section-id="${sectionId}"]`);
         const content = document.getElementById('content-' + sectionId);
         const icon = document.getElementById('icon-' + sectionId);
         
-        if (!content || !icon) return;
+        if (!content || !icon || !section) return;
 
-        const isOpen = content.style.display !== 'none';
+        const isOpen = !section.classList.contains('collapsed');
         
         if (isOpen) {
+            // Close
             content.style.display = 'none';
+            section.classList.remove('expanded');
+            section.classList.add('collapsed');
             icon.textContent = '▶';
-            icon.style.transform = 'rotate(0deg)';
         } else {
+            // Open
             content.style.display = 'block';
+            section.classList.remove('collapsed');
+            section.classList.add('expanded');
             icon.textContent = '▼';
-            icon.style.transform = 'rotate(0deg)';
         }
 
-        // Trigger input event for autosave (in case we want to save the state)
+        // Save state to localStorage
+        saveSectionState(sectionId, !isOpen);
+
+        // Trigger input event for autosave
+        const noteEntry = section.closest('.noteentry');
+        if (noteEntry) {
+            noteEntry.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    };
+
+    /**
+     * Save section state to localStorage
+     */
+    function saveSectionState(sectionId, isOpen) {
+        try {
+            const noteEntry = document.querySelector(`[data-section-id="${sectionId}"]`).closest('.noteentry');
+            if (!noteEntry) return;
+            
+            const noteId = noteEntry.getAttribute('data-note-id');
+            if (!noteId) return;
+            
+            const key = `collapsible-state-${noteId}`;
+            let states = {};
+            try {
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    states = JSON.parse(saved);
+                }
+            } catch (e) {}
+            
+            states[sectionId] = isOpen;
+            localStorage.setItem(key, JSON.stringify(states));
+        } catch (e) {
+            console.error('Error saving section state:', e);
+        }
+    }
+
+    /**
+     * Restore section states from localStorage
+     */
+    function restoreSectionStates(noteId) {
+        try {
+            const key = `collapsible-state-${noteId}`;
+            const saved = localStorage.getItem(key);
+            if (!saved) return;
+            
+            const states = JSON.parse(saved);
+            const noteEntry = document.getElementById('entry' + noteId);
+            if (!noteEntry) return;
+            
+            Object.keys(states).forEach(function(sectionId) {
+                const section = noteEntry.querySelector(`[data-section-id="${sectionId}"]`);
+                if (!section) return;
+                
+                const content = document.getElementById('content-' + sectionId);
+                const icon = document.getElementById('icon-' + sectionId);
+                if (!content || !icon) return;
+                
+                const shouldBeOpen = states[sectionId];
+                if (shouldBeOpen) {
+                    content.style.display = 'block';
+                    section.classList.remove('collapsed');
+                    section.classList.add('expanded');
+                    icon.textContent = '▼';
+                } else {
+                    content.style.display = 'none';
+                    section.classList.remove('expanded');
+                    section.classList.add('collapsed');
+                    icon.textContent = '▶';
+                }
+            });
+        } catch (e) {
+            console.error('Error restoring section states:', e);
+        }
+    }
+
+    /**
+     * Duplicate a collapsible section
+     */
+    window.duplicateCollapsibleSection = function(sectionId) {
         const section = document.querySelector(`[data-section-id="${sectionId}"]`);
-        if (section) {
-            const noteEntry = section.closest('.noteentry');
-            if (noteEntry) {
-                noteEntry.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+        if (!section) return;
+        
+        const titleElement = section.querySelector('.collapsible-title');
+        const bodyElement = section.querySelector('.collapsible-body');
+        
+        const title = titleElement ? titleElement.textContent.trim() : 'Section dépliable';
+        const body = bodyElement ? bodyElement.innerHTML : '';
+        
+        // Insert after current section
+        const newSectionId = generateSectionId();
+        const sectionHTML = `
+            <div class="collapsible-section collapsed" data-section-id="${newSectionId}">
+                <div class="collapsible-header" onclick="toggleCollapsibleSection('${newSectionId}', event)">
+                    <span class="collapsible-icon" id="icon-${newSectionId}">▶</span>
+                    <span class="collapsible-title" contenteditable="true" data-placeholder="Titre de la section">${title}</span>
+                    <div class="collapsible-actions">
+                        <button class="collapsible-action-btn" onclick="duplicateCollapsibleSection('${newSectionId}')" title="Dupliquer">📋</button>
+                        <button class="collapsible-action-btn" onclick="deleteCollapsibleSection('${newSectionId}')" title="Supprimer">🗑️</button>
+                    </div>
+                </div>
+                <div class="collapsible-content" id="content-${newSectionId}" style="display: none;">
+                    <div class="collapsible-body" contenteditable="true" data-placeholder="Contenu de la section...">${body}</div>
+                </div>
+            </div>
+        `;
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = sectionHTML.trim();
+        const newSection = tempDiv.firstElementChild;
+        
+        section.parentNode.insertBefore(newSection, section.nextSibling);
+        
+        // Add line break after
+        const br = document.createElement('br');
+        newSection.parentNode.insertBefore(br, newSection.nextSibling);
+        
+        initializeCollapsibleSection(newSectionId);
+        
+        // Trigger autosave
+        const noteEntry = section.closest('.noteentry');
+        if (noteEntry) {
+            noteEntry.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    };
+
+    /**
+     * Delete a collapsible section
+     */
+    window.deleteCollapsibleSection = function(sectionId, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        if (!confirm('Supprimer cette section dépliable ?')) {
+            return;
+        }
+        
+        const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+        if (!section) return;
+        
+        const noteEntry = section.closest('.noteentry');
+        
+        // Remove section and following line break if exists
+        const nextSibling = section.nextSibling;
+        section.remove();
+        if (nextSibling && nextSibling.nodeName === 'BR') {
+            nextSibling.remove();
+        }
+        
+        // Trigger autosave
+        if (noteEntry) {
+            noteEntry.dispatchEvent(new Event('input', { bubbles: true }));
         }
     };
 
@@ -170,6 +329,9 @@
                 initializeCollapsibleSection(sectionId);
             }
         });
+        
+        // Restore saved states
+        restoreSectionStates(noteId);
     }
 
     /**
