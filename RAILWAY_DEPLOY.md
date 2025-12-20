@@ -35,7 +35,7 @@ OPENROUTER_API_KEY=votre_cle_api_openrouter
 AI_ENABLED=1
 ```
 
-**Note** : Railway définit automatiquement la variable `PORT`, mais nginx écoute sur le port 80 à l'intérieur du conteneur. Railway mappe automatiquement ce port.
+**Note** : Railway définit automatiquement la variable `PORT` et votre application doit écouter sur `0.0.0.0:$PORT`. Le script `init.sh` configure automatiquement nginx pour écouter sur toutes les interfaces avec le port fourni par Railway. Voir la [documentation Railway sur le networking public](https://docs.railway.com/guides/public-networking).
 
 ### 3. Configurer un volume persistant pour les données
 
@@ -56,10 +56,26 @@ Railway détecte automatiquement le `Dockerfile` et déploie l'application.
 1. Railway va construire l'image Docker
 2. Une fois le build terminé, l'application sera accessible via l'URL fournie par Railway
 
-### 5. Accéder à votre application
+### 5. Générer un domaine public
 
-1. Railway génère automatiquement une URL (ex: `https://votre-projet.up.railway.app`)
-2. Vous pouvez aussi configurer un domaine personnalisé dans les paramètres
+1. Une fois le déploiement terminé, Railway détectera automatiquement que votre service écoute correctement
+2. Vous verrez un prompt "Generate Domain" sur votre service
+3. Cliquez sur "Generate Domain" pour obtenir une URL publique (ex: `https://votre-projet.up.railway.app`)
+4. Votre application sera accessible via HTTPS automatiquement
+
+**Note** : Si vous ne voyez pas le bouton "Generate Domain", vérifiez que :
+- Le déploiement est terminé et réussi
+- Les services (nginx, php-fpm) sont en état RUNNING dans les logs
+- Aucun TCP Proxy n'est configuré (il faut le supprimer pour activer le domaine HTTP)
+
+### 6. Domaine personnalisé (optionnel)
+
+Vous pouvez ajouter un domaine personnalisé :
+1. Allez dans Settings → Networking → Public Networking
+2. Cliquez sur "+ Custom Domain"
+3. Entrez votre domaine
+4. Configurez le CNAME dans votre fournisseur DNS
+5. Railway générera automatiquement un certificat SSL Let's Encrypt
 
 ## Configuration recommandée
 
@@ -100,16 +116,27 @@ Si vous voyez "erreur réseau" ou que l'application n'est pas accessible :
    - Cherchez les messages "nginx entered RUNNING state" et "php-fpm entered RUNNING state"
    - Si vous voyez ces messages, les services sont démarrés
 
-3. **Vérifiez l'URL publique** :
-   - Railway génère une URL automatiquement (ex: `https://votre-projet.up.railway.app`)
-   - Cliquez sur "Settings" → "Networking" pour voir l'URL publique
-   - Assurez-vous d'utiliser HTTPS (pas HTTP)
+3. **Générez un domaine public** :
+   - Si vous ne voyez pas de domaine, allez dans Settings → Networking → Public Networking
+   - Cliquez sur "Generate Domain" pour créer une URL publique
+   - Railway détecte automatiquement le port si votre app écoute sur un seul port
+   - Utilisez toujours HTTPS (Railway fournit SSL automatiquement)
+
+4. **Vérifiez le Target Port** :
+   - Railway détecte automatiquement le port si votre application écoute sur un seul port
+   - Si votre app écoute sur plusieurs ports, Railway vous proposera de choisir
+   - Vous pouvez modifier le Target Port en cliquant sur l'icône d'édition à côté du domaine
 
 4. **Vérifiez les variables d'environnement** :
    - `POZNOTE_USERNAME` et `POZNOTE_PASSWORD` doivent être définis
    - `SQLITE_DATABASE` doit être `/var/www/html/data/database/poznote.db`
 
-5. **Redéployez si nécessaire** :
+5. **Vérifiez que nginx écoute sur 0.0.0.0:$PORT** :
+   - Dans les logs, cherchez "Configuring nginx to listen on 0.0.0.0:$PORT"
+   - Railway exige que l'application écoute sur `0.0.0.0:$PORT` (toutes les interfaces)
+   - Le script `init.sh` configure automatiquement cela
+
+6. **Redéployez si nécessaire** :
    - Dans Railway, cliquez sur "Deployments" → "Redeploy"
    - Attendez la fin du redéploiement
 
@@ -140,6 +167,12 @@ Pour mettre à jour Poznote :
 1. Poussez vos modifications sur GitHub
 2. Railway détecte automatiquement les changements et redéploie
 3. Les données dans le volume persistant sont préservées
+
+## Références Railway
+
+- [Documentation Railway - Public Networking](https://docs.railway.com/guides/public-networking) : Guide complet sur l'exposition publique
+- [Documentation Railway - Fixing Common Errors](https://docs.railway.com/reference/errors) : Résolution des erreurs courantes
+- [Documentation Railway](https://docs.railway.app) : Documentation complète
 
 ## Support
 

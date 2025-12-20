@@ -36,13 +36,16 @@ if [ -f "$DB_PATH" ]; then
 fi
 
 # Configure nginx port for Railway (PORT) or local (HTTP_WEB_PORT)
+# Railway requires listening on 0.0.0.0:$PORT (see https://docs.railway.com/guides/public-networking)
 NGINX_PORT=${PORT:-${HTTP_WEB_PORT:-80}}
 if [ "$NGINX_PORT" != "80" ]; then
-    echo "Configuring nginx to listen on port $NGINX_PORT (Railway/Cloud mode)"
-    # Replace port in nginx config
-    sed -i "s/listen 80;/listen $NGINX_PORT;/" /etc/nginx/http.d/default.conf
+    echo "Configuring nginx to listen on 0.0.0.0:$NGINX_PORT (Railway/Cloud mode)"
+    # Replace port in nginx config - ensure it listens on 0.0.0.0 (all interfaces)
+    sed -i "s/listen 80;/listen 0.0.0.0:$NGINX_PORT;/" /etc/nginx/http.d/default.conf
 else
-    echo "Using default port 80 (local mode)"
+    echo "Using default port 80 on 0.0.0.0 (local mode)"
+    # Ensure nginx listens on all interfaces even for default port
+    sed -i "s/listen 80;/listen 0.0.0.0:80;/" /etc/nginx/http.d/default.conf
 fi
 
 echo "Starting Poznote services..."
