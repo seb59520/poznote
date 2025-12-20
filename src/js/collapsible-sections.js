@@ -177,6 +177,9 @@
      */
     window.insertCollapsibleSection = insertCollapsibleSection;
     window.initializeCollapsibleSections = initializeAllCollapsibleSections;
+    
+    // Debug: verify function is exported
+    console.log('Collapsible sections module loaded. insertCollapsibleSection available:', typeof window.insertCollapsibleSection === 'function');
 
     // Auto-initialize sections when DOM is ready
     if (document.readyState === 'loading') {

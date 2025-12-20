@@ -593,8 +593,12 @@
             icon: 'fa-chevron-down',
             label: 'Section dépliable',
             action: function () {
+                console.log('Collapsible section command triggered. Function available:', typeof window.insertCollapsibleSection);
                 if (typeof window.insertCollapsibleSection === 'function') {
                     window.insertCollapsibleSection();
+                } else {
+                    console.error('insertCollapsibleSection function not found!');
+                    alert('Erreur: La fonction de section dépliable n\'est pas disponible. Veuillez rafraîchir la page.');
                 }
             }
         }
