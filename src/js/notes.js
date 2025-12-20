@@ -336,20 +336,42 @@ function deleteNote(noteId) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody)
     })
-    .then(function(response) { return response.json(); })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.text();
+    })
     .then(function(data) {
-        if (data && data.success) {
-            redirectToWorkspace();
-            return;
+        // Clean the response - remove any leading/trailing whitespace and PHP closing tags
+        data = data.trim();
+        // Remove any PHP closing tag that might be at the start
+        data = data.replace(/^<\?php\s*/i, '').replace(/^\?\>\s*/i, '');
+        
+        if (!data) {
+            throw new Error('Empty response from server');
         }
         
-        if (data && data.message) {
-            showNotificationPopup('Deletion error: ' + data.message, 'error');
-        } else {
-            showNotificationPopup('Deletion error: Unknown error', 'error');
+        try {
+            var res = JSON.parse(data);
+            if (res && res.success) {
+                redirectToWorkspace();
+                return;
+            }
+            
+            if (res && res.message) {
+                showNotificationPopup('Deletion error: ' + res.message, 'error');
+            } else {
+                showNotificationPopup('Deletion error: Unknown error', 'error');
+            }
+        } catch(e) {
+            console.error('JSON parse error:', e);
+            console.error('Response data:', data);
+            showNotificationPopup('Error parsing response: ' + (data.substring(0, 100) || 'Empty response'), 'error');
         }
     })
     .catch(function(error) {
+        console.error('Network error:', error);
         showNotificationPopup('Network error while deleting: ' + error.message, 'error');
     });
 }
