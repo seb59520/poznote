@@ -22,25 +22,50 @@ try {
     // Ensure directory is writable
     if (!is_writable($dbDir)) {
         error_log("Database directory is not writable: $dbDir");
-        // Try to fix permissions
-        @chmod($dbDir, 0775);
+        // Try to fix permissions with more permissive settings (777 for Railway volumes)
+        @chmod($dbDir, 0777);
         if (function_exists('posix_getuid') && posix_getuid() === 0) {
             @chown($dbDir, 'www-data');
             @chgrp($dbDir, 'www-data');
         }
+        // Also try to fix parent directory
+        $parentDir = dirname($dbDir);
+        if (is_dir($parentDir) && !is_writable($parentDir)) {
+            @chmod($parentDir, 0777);
+        }
         // Check again
         if (!is_writable($dbDir)) {
-            throw new PDOException("Database directory is not writable: $dbDir");
+            // Last attempt: check if we can at least create files
+            $testFile = $dbDir . '/.test_write_' . time();
+            if (@touch($testFile)) {
+                @unlink($testFile);
+                error_log("Can create files in $dbDir, proceeding despite is_writable() check");
+            } else {
+                throw new PDOException("Database directory is not writable: $dbDir (permissions: " . substr(sprintf('%o', fileperms($dbDir)), -4) . ")");
+            }
         }
     }
     
     // Create database file if it doesn't exist
     if (!file_exists($dbPath)) {
-        touch($dbPath);
-        chmod($dbPath, 0664);
+        if (!touch($dbPath)) {
+            error_log("Failed to create database file: $dbPath");
+            throw new PDOException("Cannot create database file: $dbPath");
+        }
+        // Use more permissive permissions for Railway volumes
+        @chmod($dbPath, 0666);
         if (function_exists('posix_getuid') && posix_getuid() === 0) {
             @chown($dbPath, 'www-data');
             @chgrp($dbPath, 'www-data');
+        }
+    } else {
+        // Ensure existing file is writable
+        if (!is_writable($dbPath)) {
+            @chmod($dbPath, 0666);
+            if (function_exists('posix_getuid') && posix_getuid() === 0) {
+                @chown($dbPath, 'www-data');
+                @chgrp($dbPath, 'www-data');
+            }
         }
     }
     
