@@ -177,6 +177,18 @@ function getFolderPath(folderId, callback) {
 }
 
 /**
+ * Get color class for folder level
+ */
+function getFolderLevelClass(level) {
+    if (level === 0) return 'folder-level-0';
+    if (level === 1) return 'folder-level-1';
+    if (level === 2) return 'folder-level-2';
+    if (level === 3) return 'folder-level-3';
+    if (level === 4) return 'folder-level-4';
+    return 'folder-level-5';
+}
+
+/**
  * Display folder breadcrumb
  */
 function displayFolderBreadcrumb(folderId) {
@@ -197,7 +209,8 @@ function displayFolderBreadcrumb(folderId) {
             if (index > 0) {
                 html += ' <i class="fa fa-chevron-right"></i> ';
             }
-            html += '<span class="breadcrumb-item">' + escapeHtml(part) + '</span>';
+            var levelClass = getFolderLevelClass(index);
+            html += '<span class="breadcrumb-item ' + levelClass + '">' + escapeHtml(part) + '</span>';
         });
         
         breadcrumbDiv.innerHTML = html;

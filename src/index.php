@@ -805,7 +805,19 @@ $body_classes = trim($extra_body_classes);
                     echo '<div class="note-tags-row">';
                     echo '<div class="folder-wrapper">';
                     echo '<span class="fa-folder icon_folder" onclick="showMoveFolderDialog(\''.$row['id'].'\')" style="cursor: pointer;" title="Change folder"></span>';
-                    echo '<span class="folder_name" onclick="showMoveFolderDialog(\''.$row['id'].'\')" style="cursor: pointer;" title="Change folder">'.htmlspecialchars($folder_path, ENT_QUOTES).'</span>';
+                    
+                    // Display folder path with color coding by level
+                    $folder_parts = explode('/', $folder_path);
+                    $folder_path_html = '';
+                    foreach ($folder_parts as $index => $part) {
+                        if ($index > 0) {
+                            $folder_path_html .= ' <i class="fa fa-chevron-right" style="color: #9ca3af; font-size: 0.7em; margin: 0 4px;"></i> ';
+                        }
+                        $level_class = 'folder-level-' . min($index, 5);
+                        $folder_path_html .= '<span class="folder-path-part ' . $level_class . '">' . htmlspecialchars($part, ENT_QUOTES) . '</span>';
+                    }
+                    
+                    echo '<span class="folder_name" onclick="showMoveFolderDialog(\''.$row['id'].'\')" style="cursor: pointer;" title="Change folder">' . $folder_path_html . '</span>';
                     echo '</div>';
                     echo '<span class="fa-tag icon_tag" onclick="window.location=\'list_tags.php?workspace=\' + encodeURIComponent(window.selectedWorkspace || \'\')"></span>';
                     echo '<span class="name_tags">'

@@ -586,6 +586,64 @@ body {
 .folder-toggle { display:flex; align-items:center; gap:2px; cursor: pointer; }
 .folder-name { font-weight:600; color:#111827; }
 .folder-note-count { color:#6b7280; margin-left:6px; font-weight:400; }
+
+/* Couleurs par niveau d'arborescence */
+/* Niveau 0 (racine) - Bleu */
+.folder-header:not(.subfolder) .folder-name,
+.folder-header:not(.subfolder) .folder-icon {
+    color: #2563eb;
+}
+.folder-header:not(.subfolder) .folder-icon {
+    color: #2563eb;
+}
+
+/* Niveau 1 - Vert */
+.subfolder-level-1 .folder-name,
+.subfolder-level-1 .folder-icon {
+    color: #16a34a;
+}
+.subfolder-level-1 .folder-icon {
+    color: #16a34a;
+}
+
+/* Niveau 2 - Orange */
+.subfolder-level-2 .folder-name,
+.subfolder-level-2 .folder-icon {
+    color: #ea580c;
+}
+.subfolder-level-2 .folder-icon {
+    color: #ea580c;
+}
+
+/* Niveau 3 - Violet */
+.subfolder-level-3 .folder-name,
+.subfolder-level-3 .folder-icon {
+    color: #9333ea;
+}
+.subfolder-level-3 .folder-icon {
+    color: #9333ea;
+}
+
+/* Niveau 4 - Rose */
+.subfolder-level-4 .folder-name,
+.subfolder-level-4 .folder-icon {
+    color: #db2777;
+}
+.subfolder-level-4 .folder-icon {
+    color: #db2777;
+}
+
+/* Niveau 5+ - Teal (cycle des couleurs) */
+.subfolder-level-5 .folder-name,
+.subfolder-level-5 .folder-icon,
+.subfolder[class*="subfolder-level-"]:not(.subfolder-level-1):not(.subfolder-level-2):not(.subfolder-level-3):not(.subfolder-level-4):not(.subfolder-level-5) .folder-name,
+.subfolder[class*="subfolder-level-"]:not(.subfolder-level-1):not(.subfolder-level-2):not(.subfolder-level-3):not(.subfolder-level-4):not(.subfolder-level-5) .folder-icon {
+    color: #14b8a6;
+}
+.subfolder-level-5 .folder-icon,
+.subfolder[class*="subfolder-level-"]:not(.subfolder-level-1):not(.subfolder-level-2):not(.subfolder-level-3):not(.subfolder-level-4):not(.subfolder-level-5) .folder-icon {
+    color: #14b8a6;
+}
 .hide-folder-counts .folder-note-count { display: none; }
 
 /* When folder counts are globally hidden, reveal them when the user hovers the folder
@@ -618,6 +676,24 @@ body {
 .note-in-folder { padding-left: 26px; display:block; }
 .links_arbo_left { padding: 8px 10px; margin: 4px 0; }
 .links_arbo_left .note-title { font-weight: 500; color: #1f2937; }
+
+/* Notes dans les sous-dossiers héritent de la couleur du niveau */
+.subfolder-level-1 .note-in-subfolder .note-title {
+    color: #16a34a;
+}
+.subfolder-level-2 .note-in-subfolder .note-title {
+    color: #ea580c;
+}
+.subfolder-level-3 .note-in-subfolder .note-title {
+    color: #9333ea;
+}
+.subfolder-level-4 .note-in-subfolder .note-title {
+    color: #db2777;
+}
+.subfolder-level-5 .note-in-subfolder .note-title,
+.subfolder[class*="subfolder-level-"]:not(.subfolder-level-1):not(.subfolder-level-2):not(.subfolder-level-3):not(.subfolder-level-4):not(.subfolder-level-5) .note-in-subfolder .note-title {
+    color: #14b8a6;
+}
 
 /* Notes without folder - indent to align with folder items */
 .links_arbo_left.note-without-folder {
@@ -1520,6 +1596,58 @@ img.img-with-border-no-padding {
     display: inline-block;
     line-height: 1.2;
     transition: all 0.2s ease;
+}
+
+/* Couleurs pour les parties du chemin de dossier dans folder_name */
+.folder-path-part.folder-level-0 {
+    color: #2563eb;
+    font-weight: 600;
+}
+.folder-path-part.folder-level-1 {
+    color: #16a34a;
+    font-weight: 600;
+}
+.folder-path-part.folder-level-2 {
+    color: #ea580c;
+    font-weight: 600;
+}
+.folder-path-part.folder-level-3 {
+    color: #9333ea;
+    font-weight: 600;
+}
+.folder-path-part.folder-level-4 {
+    color: #db2777;
+    font-weight: 600;
+}
+.folder-path-part.folder-level-5 {
+    color: #14b8a6;
+    font-weight: 600;
+}
+
+/* Couleurs pour le breadcrumb */
+.breadcrumb-item.folder-level-0 {
+    color: #2563eb;
+    font-weight: 600;
+}
+.breadcrumb-item.folder-level-1 {
+    color: #16a34a;
+    font-weight: 600;
+}
+.breadcrumb-item.folder-level-2 {
+    color: #ea580c;
+    font-weight: 600;
+}
+.breadcrumb-item.folder-level-3 {
+    color: #9333ea;
+    font-weight: 600;
+}
+.breadcrumb-item.folder-level-4 {
+    color: #db2777;
+    font-weight: 600;
+}
+.breadcrumb-item.folder-level-5 {
+    color: #14b8a6;
+    font-weight: 600;
 }
 
 .folder_name:hover {
