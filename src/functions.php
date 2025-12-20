@@ -430,8 +430,22 @@ function restoreCompleteBackup($uploadedFile, $isLocalFile = false) {
         $entriesDir = $tempExtractDir . '/entries';
         if (is_dir($entriesDir)) {
             $entriesResult = restoreEntriesFromDir($entriesDir);
-            $results[] = 'Notes: ' . ($entriesResult['success'] ? 'Restored ' . $entriesResult['count'] . ' files' : 'Failed - ' . $entriesResult['error']);
-            if (!$entriesResult['success']) $hasErrors = true;
+            if ($entriesResult['success']) {
+                $msg = 'Restored ' . $entriesResult['count'] . ' file(s)';
+                if (isset($entriesResult['created']) && $entriesResult['created'] > 0) {
+                    $msg .= ', created ' . $entriesResult['created'] . ' database entry(ies)';
+                }
+                if (isset($entriesResult['errors']) && !empty($entriesResult['errors'])) {
+                    $msg .= ', ' . count($entriesResult['errors']) . ' error(s)';
+                }
+                $results[] = 'Notes: ' . $msg;
+            } else {
+                $results[] = 'Notes: Failed - ' . ($entriesResult['error'] ?? 'Unknown error');
+                $hasErrors = true;
+            }
+            if (isset($entriesResult['errors']) && !empty($entriesResult['errors'])) {
+                $hasErrors = true;
+            }
         } else {
             if ($hasEntries) {
                 $results[] = 'Notes: Entries directory expected but not found after extraction';
@@ -525,10 +539,16 @@ function restoreDatabaseFromFile($sqlFile) {
  * Restore entries from directory
  */
 function restoreEntriesFromDir($sourceDir) {
+    global $con;
     $entriesPath = getEntriesPath();
     
     if (!$entriesPath || !is_dir($entriesPath)) {
         return ['success' => false, 'error' => 'Cannot find entries directory'];
+    }
+    
+    // Ensure entries directory is writable
+    if (!is_writable($entriesPath)) {
+        @chmod($entriesPath, 0775);
     }
     
     $files = new RecursiveIteratorIterator(
@@ -537,6 +557,8 @@ function restoreEntriesFromDir($sourceDir) {
     );
     
     $importedCount = 0;
+    $createdCount = 0;
+    $errors = [];
     
     foreach ($files as $name => $file) {
         if (!$file->isDir()) {
@@ -546,16 +568,94 @@ function restoreEntriesFromDir($sourceDir) {
             
             // Include both HTML and Markdown files
             if ($extension === 'html' || $extension === 'md') {
-                $targetFile = $entriesPath . '/' . basename($relativePath);
-                if (copy($filePath, $targetFile)) {
-                    chmod($targetFile, 0644);
+                $filename = basename($relativePath);
+                $targetFile = $entriesPath . '/' . $filename;
+                
+                // Extract note ID from filename (e.g., "123.html" -> 123)
+                $noteId = (int)pathinfo($filename, PATHINFO_FILENAME);
+                
+                // Read file content
+                $content = file_get_contents($filePath);
+                if ($content === false) {
+                    $errors[] = "Cannot read file: $filename";
+                    continue;
+                }
+                
+                // Copy file
+                if (!copy($filePath, $targetFile)) {
+                    $errors[] = "Cannot copy file: $filename";
+                    continue;
+                }
+                
+                @chmod($targetFile, 0644);
+                
+                // Determine note type
+                $noteType = ($extension === 'md') ? 'markdown' : 'note';
+                
+                // Extract title from content
+                $title = 'Imported Note';
+                if ($noteType === 'markdown') {
+                    // Try to extract title from first line if it's a heading
+                    $lines = explode("\n", $content, 2);
+                    if (!empty($lines[0]) && preg_match('/^#+\s+(.+)$/', trim($lines[0]), $matches)) {
+                        $title = trim($matches[1]);
+                    } elseif (!empty($lines[0])) {
+                        $title = trim($lines[0]);
+                    }
+                } else {
+                    // For HTML, try to extract from <h1> or <title>
+                    if (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $content, $matches)) {
+                        $title = strip_tags($matches[1]);
+                    } elseif (preg_match('/<title[^>]*>(.*?)<\/title>/is', $content, $matches)) {
+                        $title = strip_tags($matches[1]);
+                    }
+                }
+                
+                // Check if entry exists in database
+                try {
+                    $checkStmt = $con->prepare("SELECT id FROM entries WHERE id = ?");
+                    $checkStmt->execute([$noteId]);
+                    $existing = $checkStmt->fetch();
+                    
+                    if (!$existing) {
+                        // Create entry in database if it doesn't exist
+                        $insertStmt = $con->prepare("
+                            INSERT INTO entries (id, heading, entry, folder, folder_id, workspace, type, created, updated, trash, favorite) 
+                            VALUES (?, ?, ?, 'Default', NULL, 'Poznote', ?, datetime('now'), datetime('now'), 0, 0)
+                        ");
+                        $insertStmt->execute([$noteId, $title, $content, $noteType]);
+                        $createdCount++;
+                    } else {
+                        // Update entry content if it exists but content might be different
+                        $updateStmt = $con->prepare("UPDATE entries SET entry = ?, type = ?, updated = datetime('now') WHERE id = ?");
+                        $updateStmt->execute([$content, $noteType, $noteId]);
+                    }
+                    
                     $importedCount++;
+                } catch (Exception $e) {
+                    $errors[] = "Database error for $filename: " . $e->getMessage();
+                    error_log("Restore entry error: " . $e->getMessage());
                 }
             }
         }
     }
     
-    return ['success' => true, 'count' => $importedCount];
+    $message = "Restored $importedCount file(s)";
+    if ($createdCount > 0) {
+        $message .= ", created $createdCount database entry(ies)";
+    }
+    if (!empty($errors)) {
+        $message .= ", " . count($errors) . " error(s)";
+        error_log("Restore entries errors: " . implode(", ", array_slice($errors, 0, 5)));
+    }
+    
+    return [
+        'success' => $importedCount > 0,
+        'count' => $importedCount,
+        'created' => $createdCount,
+        'errors' => $errors,
+        'message' => $message
+    ];
 }
 
 /**
@@ -671,4 +771,6 @@ function getFolderPath($folder_id, $con) {
     
     return !empty($path) ? implode('/', $path) : 'Default';
 }
+?>
+
 ?>
