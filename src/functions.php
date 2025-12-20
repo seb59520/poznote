@@ -311,62 +311,99 @@ function restoreCompleteBackup($uploadedFile, $isLocalFile = false) {
             return ['success' => false, 'error' => 'Cannot open ZIP file'];
         }
         
+        // Check ZIP contents before extracting
+        $zipContents = [];
+        $hasDatabase = false;
+        $hasEntries = false;
+        $hasAttachments = false;
+        
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+            $zipContents[] = $filename;
+            
+            if (strpos($filename, 'database/poznote_backup.sql') !== false) {
+                $hasDatabase = true;
+            }
+            if (strpos($filename, 'entries/') === 0 && !str_ends_with($filename, '/')) {
+                $hasEntries = true;
+            }
+            if (strpos($filename, 'attachments/') === 0 && !str_ends_with($filename, '/')) {
+                $hasAttachments = true;
+            }
+        }
+        
+        // Warn if backup seems empty or invalid
+        if (!$hasDatabase && !$hasEntries && !$hasAttachments) {
+            $zip->close();
+            unlink($tempFile);
+            deleteDirectory($tempExtractDir);
+            return [
+                'success' => false, 
+                'error' => 'Backup file appears to be empty or invalid. No database, entries, or attachments found.',
+                'message' => 'ZIP contents: ' . (empty($zipContents) ? 'empty' : implode(', ', array_slice($zipContents, 0, 10)) . (count($zipContents) > 10 ? '...' : ''))
+            ];
+        }
+        
         $zip->extractTo($tempExtractDir);
         $zip->close();
         unlink($tempFile);
         $tempFile = null; // Mark as cleaned
-        
-        // CLEAR ENTRIES DIRECTORY BEFORE RESTORATION
-        $entriesPath = getEntriesPath();
-        if (is_dir($entriesPath)) {
-            // Delete all files in entries directory
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($entriesPath, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::CHILD_FIRST
-            );
-            
-            $entriesCleared = 0;
-            foreach ($files as $fileinfo) {
-                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-                $todo($fileinfo->getRealPath());
-                $entriesCleared++;
-            }
-            error_log("CLEARED $entriesCleared files from entries directory");
-        } else {
-            // Create entries directory if it doesn't exist
-            mkdir($entriesPath, 0755, true);
-            if (function_exists('posix_getuid') && posix_getuid() === 0) {
-                $current_uid = posix_getuid();
-                $current_gid = posix_getgid();
-                chown($entriesPath, $current_uid);
-                chgrp($entriesPath, $current_gid);
+
+        // CLEAR ENTRIES DIRECTORY BEFORE RESTORATION (only if we have entries to restore)
+        if ($hasEntries) {
+            $entriesPath = getEntriesPath();
+            if (is_dir($entriesPath)) {
+                // Delete all files in entries directory
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($entriesPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CHILD_FIRST
+                );
+                
+                $entriesCleared = 0;
+                foreach ($files as $fileinfo) {
+                    $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                    $todo($fileinfo->getRealPath());
+                    $entriesCleared++;
+                }
+                error_log("CLEARED $entriesCleared files from entries directory");
+            } else {
+                // Create entries directory if it doesn't exist
+                mkdir($entriesPath, 0755, true);
+                if (function_exists('posix_getuid') && posix_getuid() === 0) {
+                    $current_uid = posix_getuid();
+                    $current_gid = posix_getgid();
+                    chown($entriesPath, $current_uid);
+                    chgrp($entriesPath, $current_gid);
+                }
             }
         }
         
-        // CLEAR ATTACHMENTS DIRECTORY BEFORE RESTORATION
-        $attachmentsPath = getAttachmentsPath();
-        if (is_dir($attachmentsPath)) {
-            // Delete all files in attachments directory
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($attachmentsPath, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::CHILD_FIRST
-            );
-            
-            $attachmentsCleared = 0;
-            foreach ($files as $fileinfo) {
-                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-                $todo($fileinfo->getRealPath());
-                $attachmentsCleared++;
-            }
-            error_log("CLEARED $attachmentsCleared files from attachments directory");
-        } else {
-            // Create attachments directory if it doesn't exist
-            mkdir($attachmentsPath, 0755, true);
-            if (function_exists('posix_getuid') && posix_getuid() === 0) {
-                $current_uid = posix_getuid();
-                $current_gid = posix_getgid();
-                chown($attachmentsPath, $current_uid);
-                chgrp($attachmentsPath, $current_gid);
+        // CLEAR ATTACHMENTS DIRECTORY BEFORE RESTORATION (only if we have attachments to restore)
+        if ($hasAttachments) {
+            $attachmentsPath = getAttachmentsPath();
+            if (is_dir($attachmentsPath)) {
+                // Delete all files in attachments directory
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($attachmentsPath, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CHILD_FIRST
+                );
+                
+                $attachmentsCleared = 0;
+                foreach ($files as $fileinfo) {
+                    $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                    $todo($fileinfo->getRealPath());
+                    $attachmentsCleared++;
+                }
+                error_log("CLEARED $attachmentsCleared files from attachments directory");
+            } else {
+                // Create attachments directory if it doesn't exist
+                mkdir($attachmentsPath, 0755, true);
+                if (function_exists('posix_getuid') && posix_getuid() === 0) {
+                    $current_uid = posix_getuid();
+                    $current_gid = posix_getgid();
+                    chown($attachmentsPath, $current_uid);
+                    chgrp($attachmentsPath, $current_gid);
+                }
             }
         }
         
@@ -381,7 +418,12 @@ function restoreCompleteBackup($uploadedFile, $isLocalFile = false) {
             if (!$dbResult['success']) $hasErrors = true;
             // Note: Schema migration is now handled inside restoreDatabaseFromFile()
         } else {
-            $results[] = 'Database: No SQL file found in backup';
+            if ($hasDatabase) {
+                $results[] = 'Database: SQL file expected but not found after extraction';
+                $hasErrors = true;
+            } else {
+                $results[] = 'Database: No SQL file found in backup (skipped)';
+            }
         }
         
         // Restore entries if entries directory exists in backup
@@ -391,7 +433,12 @@ function restoreCompleteBackup($uploadedFile, $isLocalFile = false) {
             $results[] = 'Notes: ' . ($entriesResult['success'] ? 'Restored ' . $entriesResult['count'] . ' files' : 'Failed - ' . $entriesResult['error']);
             if (!$entriesResult['success']) $hasErrors = true;
         } else {
-            $results[] = 'Notes: No entries directory found in backup (entries directory cleared)';
+            if ($hasEntries) {
+                $results[] = 'Notes: Entries directory expected but not found after extraction';
+                $hasErrors = true;
+            } else {
+                $results[] = 'Notes: No entries directory found in backup (skipped - existing entries preserved)';
+            }
         }
         
         // Restore attachments if attachments directory exists in backup
@@ -401,7 +448,12 @@ function restoreCompleteBackup($uploadedFile, $isLocalFile = false) {
             $results[] = 'Attachments: ' . ($attachmentsResult['success'] ? 'Restored ' . $attachmentsResult['count'] . ' files' : 'Failed - ' . $attachmentsResult['error']);
             if (!$attachmentsResult['success']) $hasErrors = true;
         } else {
-            $results[] = 'Attachments: No attachments directory found in backup (attachments directory cleared)';
+            if ($hasAttachments) {
+                $results[] = 'Attachments: Attachments directory expected but not found after extraction';
+                $hasErrors = true;
+            } else {
+                $results[] = 'Attachments: No attachments directory found in backup (skipped - existing attachments preserved)';
+            }
         }
         
         // Clean up temporary directory
