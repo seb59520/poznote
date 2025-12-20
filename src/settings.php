@@ -80,6 +80,17 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
                     <h3>Restore / Import</h3>
                 </div>
             </div>
+            
+            <!-- Data Transfer -->
+            <div class="settings-card" onclick="window.location = 'data_transfer.php';">
+                <div class="settings-card-icon">
+                    <i class="fa-exchange-alt"></i>
+                </div>
+                <div class="settings-card-content">
+                    <h3>Transfert de Données</h3>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Exporter/Importer uniquement la base de données</p>
+                </div>
+            </div>
 
             <!-- Updates -->
             <div class="settings-card" onclick="checkForUpdates();">
