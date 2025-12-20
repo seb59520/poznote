@@ -35,14 +35,29 @@ if [ -f "$DB_PATH" ]; then
     chmod 664 "$DB_PATH"
 fi
 
+# Configure nginx port for Railway (PORT) or local (HTTP_WEB_PORT)
+NGINX_PORT=${PORT:-${HTTP_WEB_PORT:-80}}
+if [ "$NGINX_PORT" != "80" ]; then
+    echo "Configuring nginx to listen on port $NGINX_PORT (Railway/Cloud mode)"
+    # Replace port in nginx config
+    sed -i "s/listen 80;/listen $NGINX_PORT;/" /etc/nginx/http.d/default.conf
+else
+    echo "Using default port 80 (local mode)"
+fi
+
 echo "Starting Poznote services..."
 echo ""
 echo "======================================"
 echo "  Poznote is ready!"
 echo "======================================"
 echo ""
-echo "  Access your instance at:"
-echo "  → http://localhost:${HTTP_WEB_PORT}"
+if [ -n "$PORT" ]; then
+    echo "  Railway deployment detected"
+    echo "  Port: $PORT"
+elif [ -n "$HTTP_WEB_PORT" ]; then
+    echo "  Access your instance at:"
+    echo "  → http://localhost:${HTTP_WEB_PORT}"
+fi
 echo ""
 echo "======================================"
 echo ""

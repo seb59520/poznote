@@ -87,22 +87,51 @@ Ou utilisez la fonctionnalité de backup intégrée de Poznote via l'interface w
 
 ## Dépannage
 
+### Erreur réseau / Impossible de se connecter
+
+Si vous voyez "erreur réseau" ou que l'application n'est pas accessible :
+
+1. **Vérifiez que le déploiement est terminé** :
+   - Attendez 2-3 minutes après le déploiement
+   - Vérifiez que le build est en état "Deployed" (vert) dans Railway
+
+2. **Vérifiez les logs Railway** :
+   - Dans Railway, cliquez sur votre service → "Deployments" → "View Logs"
+   - Cherchez les messages "nginx entered RUNNING state" et "php-fpm entered RUNNING state"
+   - Si vous voyez ces messages, les services sont démarrés
+
+3. **Vérifiez l'URL publique** :
+   - Railway génère une URL automatiquement (ex: `https://votre-projet.up.railway.app`)
+   - Cliquez sur "Settings" → "Networking" pour voir l'URL publique
+   - Assurez-vous d'utiliser HTTPS (pas HTTP)
+
+4. **Vérifiez les variables d'environnement** :
+   - `POZNOTE_USERNAME` et `POZNOTE_PASSWORD` doivent être définis
+   - `SQLITE_DATABASE` doit être `/var/www/html/data/database/poznote.db`
+
+5. **Redéployez si nécessaire** :
+   - Dans Railway, cliquez sur "Deployments" → "Redeploy"
+   - Attendez la fin du redéploiement
+
 ### L'application ne démarre pas
 
-1. Vérifiez les logs Railway : `railway logs`
+1. Vérifiez les logs Railway : Dans Railway → Service → Deployments → View Logs
 2. Vérifiez que toutes les variables d'environnement sont définies
 3. Vérifiez que le volume est correctement monté
+4. Cherchez les erreurs dans les logs (lignes en rouge)
 
 ### Les données sont perdues
 
 - Assurez-vous que le volume persistant est monté sur `/var/www/html/data`
 - Vérifiez que le volume n'a pas été supprimé accidentellement
+- Vérifiez dans Railway → Service → Volumes que le volume existe
 
 ### Problèmes de permissions
 
 Le script `init.sh` configure automatiquement les permissions. Si vous avez des problèmes :
-1. Vérifiez les logs de démarrage
+1. Vérifiez les logs de démarrage (cherchez "Setting correct permissions")
 2. Assurez-vous que le volume est monté avec les bonnes permissions
+3. Si nécessaire, redéployez pour réinitialiser les permissions
 
 ## Mise à jour
 
