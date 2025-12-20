@@ -214,20 +214,43 @@ function saveNoteToServer() {
         },
         body: JSON.stringify(params)
     })
-    .then(function(response) { return response.json(); })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.text();
+    })
     .then(function(data) {
-        if (data.success) {
-            handleSaveResponse(JSON.stringify({date: new Date().toLocaleDateString(), title: headi, original_title: headi}));
-        } else {
-            console.error('[Poznote Auto-Save] Save error:', data.message || 'Unknown error');
-            // Show user-visible error notification
+        // Clean the response - remove any leading/trailing whitespace and PHP closing tags
+        data = data.trim();
+        // Remove any PHP closing tag that might be at the start
+        data = data.replace(/^<\?php\s*/i, '').replace(/^\?\>\s*/i, '');
+        
+        if (!data) {
+            throw new Error('Empty response from server');
+        }
+        
+        try {
+            var res = JSON.parse(data);
+            if (res.success) {
+                handleSaveResponse(JSON.stringify({date: new Date().toLocaleDateString(), title: headi, original_title: headi}));
+            } else {
+                console.error('[Poznote Auto-Save] Save error:', res.message || 'Unknown error');
+                // Show user-visible error notification
+                if (typeof showNotificationPopup === 'function') {
+                    showNotificationPopup(res.message || 'Error saving note', 'error');
+                }
+            }
+        } catch(e) {
+            console.error('[Poznote Auto-Save] JSON parse error:', e);
+            console.error('[Poznote Auto-Save] Response data:', data);
             if (typeof showNotificationPopup === 'function') {
-                showNotificationPopup(data.message || 'Error saving note', 'error');
+                showNotificationPopup('Error parsing response: ' + (data.substring(0, 100) || 'Empty response'), 'error');
             }
         }
     })
     .catch(function(error) {
-        console.error('[Poznote Auto-Save] Network error:', error.message);
+        console.error('[Poznote Auto-Save] Network error:', error);
         if (typeof showNotificationPopup === 'function') {
             showNotificationPopup('Network error: ' + error.message, 'error');
         }

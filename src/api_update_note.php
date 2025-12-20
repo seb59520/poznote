@@ -1,11 +1,13 @@
 <?php
+// Set headers first, before any includes
+header('Content-Type: application/json; charset=utf-8');
+
 require 'auth.php';
 requireApiAuth();
 
-header('Content-Type: application/json');
-	require_once 'config.php';
-	include 'functions.php';
-	include 'db_connect.php';
+require_once 'config.php';
+include 'functions.php';
+include 'db_connect.php';
 
 // Only accept POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -246,13 +248,14 @@ if ($workspace !== null) {
 try {
     if ($stmt->execute($executeParams)) {
         echo json_encode(['success' => true, 'id' => $id, 'title' => $originalHeading]);
+        exit;
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Database error while updating note']);
+        exit;
     }
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Database exception: ' . $e->getMessage()]);
+    exit;
 }
-
-?>
