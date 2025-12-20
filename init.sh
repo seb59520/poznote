@@ -10,9 +10,11 @@ DB_PATH="$DATA_DIR/database/poznote.db"
 WWW_DATA_UID=$(id -u www-data)
 
 # Ensure data directory exists with correct permissions
+echo "Creating data directories..."
 mkdir -p "$DATA_DIR"
 mkdir -p "$DATA_DIR/database"
 mkdir -p "$DATA_DIR/attachments"
+mkdir -p "$DATA_DIR/entries"
 
 # Check if we're using old Debian permissions (UID 33) and migrate to Alpine (UID 82)
 if [ -d "$DATA_DIR" ] && [ "$(stat -c '%u' "$DATA_DIR" 2>/dev/null || stat -f '%u' "$DATA_DIR")" = "33" ] && [ "$WWW_DATA_UID" = "82" ]; then
@@ -26,16 +28,47 @@ else
     chown -R www-data:www-data "$DATA_DIR"
 fi
 
+# Ensure directories are writable
 chmod -R 775 "$DATA_DIR"
+chmod 775 "$DATA_DIR/database"
+chmod 775 "$DATA_DIR/attachments"
+chmod 775 "$DATA_DIR/entries"
 
-echo "Final permissions check:"
-ls -la "$DATA_DIR"
-
-# Ensure final permissions are correct for database files
-if [ -f "$DB_PATH" ]; then
+# Create database file if it doesn't exist and ensure it's writable
+if [ ! -f "$DB_PATH" ]; then
+    echo "Creating database file: $DB_PATH"
+    touch "$DB_PATH"
+    chown www-data:www-data "$DB_PATH"
+    chmod 664 "$DB_PATH"
+else
+    echo "Database file already exists: $DB_PATH"
+    # Ensure existing database is writable
     chown www-data:www-data "$DB_PATH"
     chmod 664 "$DB_PATH"
 fi
+
+# Verify database directory is writable
+if [ -w "$DATA_DIR/database" ]; then
+    echo "✓ Database directory is writable"
+else
+    echo "ERROR: Database directory is NOT writable!"
+    ls -la "$DATA_DIR/database"
+    exit 1
+fi
+
+# Verify database file is writable (or can be created)
+DB_DIR=$(dirname "$DB_PATH")
+if [ -w "$DB_DIR" ]; then
+    echo "✓ Database file directory is writable"
+else
+    echo "ERROR: Database file directory is NOT writable: $DB_DIR"
+    ls -la "$DB_DIR"
+    exit 1
+fi
+
+echo "Final permissions check:"
+ls -la "$DATA_DIR"
+ls -la "$DATA_DIR/database" 2>/dev/null || echo "Warning: database directory listing failed"
 
 # Verify web root exists and is readable
 if [ ! -d "/var/www/html" ]; then

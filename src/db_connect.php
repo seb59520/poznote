@@ -5,8 +5,43 @@ try {
     // Ensure the database directory exists
     $dbPath = SQLITE_DATABASE;
     $dbDir = dirname($dbPath);
+    
+    // Create directory if it doesn't exist
     if (!is_dir($dbDir)) {
-        mkdir($dbDir, 0755, true);
+        if (!mkdir($dbDir, 0775, true)) {
+            error_log("Failed to create database directory: $dbDir");
+            throw new PDOException("Cannot create database directory: $dbDir");
+        }
+        // Try to set ownership if running as root (Docker context)
+        if (function_exists('posix_getuid') && posix_getuid() === 0) {
+            @chown($dbDir, 'www-data');
+            @chgrp($dbDir, 'www-data');
+        }
+    }
+    
+    // Ensure directory is writable
+    if (!is_writable($dbDir)) {
+        error_log("Database directory is not writable: $dbDir");
+        // Try to fix permissions
+        @chmod($dbDir, 0775);
+        if (function_exists('posix_getuid') && posix_getuid() === 0) {
+            @chown($dbDir, 'www-data');
+            @chgrp($dbDir, 'www-data');
+        }
+        // Check again
+        if (!is_writable($dbDir)) {
+            throw new PDOException("Database directory is not writable: $dbDir");
+        }
+    }
+    
+    // Create database file if it doesn't exist
+    if (!file_exists($dbPath)) {
+        touch($dbPath);
+        chmod($dbPath, 0664);
+        if (function_exists('posix_getuid') && posix_getuid() === 0) {
+            @chown($dbPath, 'www-data');
+            @chgrp($dbPath, 'www-data');
+        }
     }
     
     $con = new PDO('sqlite:' . $dbPath);
