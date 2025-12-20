@@ -587,6 +587,24 @@ body {
 .folder-name { font-weight:600; color:#111827; }
 .folder-note-count { color:#6b7280; margin-left:6px; font-weight:400; }
 
+/* Indentation par niveau d'arborescence */
+.subfolder-level-1 {
+    padding-left: 20px;
+}
+.subfolder-level-2 {
+    padding-left: 40px;
+}
+.subfolder-level-3 {
+    padding-left: 60px;
+}
+.subfolder-level-4 {
+    padding-left: 80px;
+}
+.subfolder-level-5,
+.subfolder[class*="subfolder-level-"]:not(.subfolder-level-1):not(.subfolder-level-2):not(.subfolder-level-3):not(.subfolder-level-4):not(.subfolder-level-5) {
+    padding-left: 100px;
+}
+
 /* Couleurs par niveau d'arborescence */
 /* Niveau 0 (racine) - Bleu */
 .folder-header:not(.subfolder) .folder-name,
