@@ -709,19 +709,65 @@ function toggleEmojiPicker() {
   const picker = document.createElement('div');
   picker.className = 'emoji-picker';
   
-  // Simplified popular emojis collection
-  const emojis = ['😀', '😃', '😄', '😊', '😍', '😘', '😎', '🤔', '😅', '😂', '😢', '😭', '😡', '👍', '👎', '👉', '👌', '✌️', '👏', '🙌', '👋', '🤝', '🙏', '✊', '👊', '❤️', '➜', '🚧', '✅', '🟩', '🟪', '☑️', '❌', '✔️', '❗', '❓', '⭐', '🔥', '💯', '🎯', '📌', '🚀', '💡', '🔔', '⚡', '🌟', '💎', '📱', '💻', '📧', '📁', '📄', '📝', '🔍', '🔑', '⚙️', '🛠️', '📊', '📈', '⚠️', '🚩', '🟢', '🔴', '🔵', '☀️', '🌙', '☕', '🍕', '🎂', '🍎', '🌱', '🌸', '🐱', '🐶', '🎵', '🎨'];  
+  // Emojis organized by categories
+  const emojiCategories = {
+    'Fréquents': ['😀', '😃', '😄', '😊', '😍', '😘', '😎', '🤔', '😅', '😂', '😢', '😭', '😡', '👍', '👎', '❤️', '✅', '❌', '❗', '❓', '⭐', '🔥', '💯', '💡', '⚡', '⚠️'],
+    'Émotions': ['😀', '😃', '😄', '😁', '😆', '😊', '😍', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '😤', '😠', '😡', '🤬', '😶', '😐', '😑', '😯', '😦', '😧', '😮', '😲', '😱', '🤯', '😢', '😭', '😵', '😪', '😴', '🤤', '😌', '😛', '🤐', '🤫', '🤭', '🤗', '🤔'],
+    'Actions': ['👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦵', '🦶', '👂', '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄'],
+    'Symboles': ['✅', '❌', '✔️', '✖️', '❗', '❓', '❕', '❔', '⚠️', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪', '🟤', '🔶', '🔷', '🔸', '🔹', '🔺', '🔻', '💠', '🔘', '🔳', '🔲', '⬛', '⬜', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '🟫', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪', '🟤'],
+    'Objets': ['💡', '🔔', '🔍', '🔑', '⚙️', '🛠️', '📌', '📍', '📎', '📝', '📄', '📁', '📂', '📊', '📈', '📉', '📋', '📌', '📍', '📎', '🖇️', '📏', '📐', '✂️', '🗑️', '🔒', '🔓', '🔐', '🔑', '🗝️', '🔨', '🪓', '⛏️', '⚒️', '🛠️', '🔧', '🔩', '⚙️', '🧰', '🧲', '🔫', '💣', '🧨', '🔪', '🗡️', '⚔️', '🛡️', '🚬', '⚰️', '⚱️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩹', '🩺', '💊', '💉', '🧬', '🦠', '🧫', '🧪', '🌡️', '🧹', '🧺', '🧻', '🚽', '🚿', '🛁', '🛀', '🧼', '🪒', '🧽', '🪣', '🧴', '🛎️', '🔑', '🗝️', '🚪', '🪑', '🛋️', '🛏️', '🛌', '🧸', '🪆', '🪅', '🪡', '🧵', '🪢', '🧶', '🧷', '🧹', '🧺', '🧻', '🧼', '🧽', '🧯', '🛒', '🚬', '⚰️', '⚱️', '🗿', '🪧', '🪪', '🏧', '🚮', '🚰', '♿', '🚹', '🚺', '🚻', '🚼', '🚾', '🛂', '🛃', '🛄', '🛅', '⚠️', '🚸', '⛔', '🚫', '🚳', '🚭', '🚯', '🚱', '🚷', '📵', '🔞', '☢️', '☣️'],
+    'Nature': ['🌱', '🌲', '🌳', '🌴', '🌵', '🌶️', '🌷', '🌸', '🌹', '🌺', '🌻', '🌼', '🌽', '🌾', '🌿', '☘️', '🍀', '🍁', '🍂', '🍃', '🍄', '🍇', '🍈', '🍉', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎', '🍏', '🍐', '🍑', '🍒', '🍓', '🥝', '🍅', '🥥', '🥑', '🍆', '🥔', '🥕', '🌽', '🌶️', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🫓', '🥨', '🥯', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🌭', '🍔', '🍟', '🍕', '🫔', '🥪', '🥙', '🧆', '🌮', '🌯', '🫔', '🥗', '🥘', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🦪', '🍤', '🍙', '🍚', '🍘', '🍥', '🥠', '🥮', '🍢', '🍡', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🫖', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧋', '🧃', '🧉', '🧊', '🥢', '🍽️', '🍴', '🥄', '🔪', '🏺'],
+    'Animaux': ['🐱', '🐶', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🪶', '🐓', '🦃', '🦤', '🦚', '🦜', '🦢', '🦩', '🕊️', '🐇', '🦝', '🦨', '🦡', '🦫', '🦦', '🦥', '🐁', '🐀', '🐿️', '🦔', '🐾', '🐉', '🐲'],
+    'Activités': ['🎯', '🎮', '🎲', '🧩', '♠️', '♥️', '♦️', '♣️', '🃏', '🀄', '🎴', '🎭', '🖼️', '🎨', '🧵', '🪡', '🧶', '🎼', '🎵', '🎶', '🎤', '🎧', '📻', '🎷', '🪗', '🎸', '🪕', '🎹', '🎺', '🎻', '🥁', '🪘', '🪇', '🪈', '🎪', '🛝', '🎡', '🎢', '🎠', '🎟️', '🎫', '🎗️', '🎖️', '🏆', '🏅', '🥇', '🥈', '🥉', '⚽', '⚾', '🥎', '🏀', '🏐', '🏈', '🏉', '🎾', '🥏', '🎳', '🏏', '🏑', '🏒', '🥍', '🏓', '🏸', '🥊', '🥋', '🥅', '⛳', '⛸️', '🎣', '🤿', '🎽', '🎿', '🛷', '🥌', '🎯', '🪀', '🪁', '🎱', '🎮', '🕹️', '🎰', '🎲', '🧩', '🧸', '🪅', '🪆', '🃏', '🀄', '🎴', '🎭', '🖼️', '🎨', '🧵', '🪡', '🧶'],
+    'Icônes': ['💡', '🔔', '⚡', '🔥', '⭐', '🌟', '💫', '✨', '💥', '💢', '💤', '💨', '🕳️', '💣', '💬', '👁️‍🗨️', '🗨️', '🗯️', '💭', '💮', '🌐', '🌍', '🌎', '🌏', '🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘', '🌙', '🌚', '🌛', '🌜', '🌝', '🌞', '⭐', '🌟', '🌠', '☀️', '⛅', '☁️', '⛈️', '🌤️', '🌥️', '🌦️', '🌧️', '🌨️', '🌩️', '🌪️', '🌫️', '🌬️', '🌀', '🌈', '☂️', '☔', '⚡', '❄️', '☃️', '⛄', '☄️', '🔥', '💧', '🌊']
+  };
+
+  // Font Awesome icons collection
+  const iconCategories = {
+    'Utiles': ['fa-lightbulb', 'fa-exclamation', 'fa-question', 'fa-info', 'fa-check', 'fa-times', 'fa-star', 'fa-heart', 'fa-bookmark', 'fa-flag', 'fa-tag', 'fa-bell', 'fa-bolt', 'fa-fire', 'fa-gem', 'fa-key', 'fa-lock', 'fa-unlock', 'fa-search', 'fa-filter', 'fa-cog', 'fa-wrench', 'fa-tools', 'fa-paperclip', 'fa-link', 'fa-share', 'fa-download', 'fa-upload', 'fa-copy', 'fa-paste', 'fa-cut', 'fa-edit', 'fa-trash', 'fa-save', 'fa-folder', 'fa-folder-open', 'fa-file', 'fa-file-alt', 'fa-image', 'fa-video', 'fa-music', 'fa-calendar', 'fa-clock', 'fa-user', 'fa-users', 'fa-envelope', 'fa-phone', 'fa-home', 'fa-globe', 'fa-map', 'fa-location-arrow', 'fa-compass'],
+    'Actions': ['fa-play', 'fa-pause', 'fa-stop', 'fa-forward', 'fa-backward', 'fa-step-forward', 'fa-step-backward', 'fa-fast-forward', 'fa-fast-backward', 'fa-eject', 'fa-repeat', 'fa-shuffle', 'fa-random', 'fa-sync', 'fa-redo', 'fa-undo', 'fa-refresh', 'fa-spinner', 'fa-circle-notch', 'fa-cog', 'fa-settings', 'fa-sliders-h', 'fa-toggle-on', 'fa-toggle-off', 'fa-power-off', 'fa-plug', 'fa-battery-full', 'fa-battery-half', 'fa-battery-empty', 'fa-signal', 'fa-wifi', 'fa-bluetooth', 'fa-usb', 'fa-hdd', 'fa-server', 'fa-database', 'fa-cloud', 'fa-cloud-download', 'fa-cloud-upload', 'fa-sync-alt', 'fa-exchange-alt', 'fa-arrows-alt', 'fa-expand', 'fa-compress', 'fa-expand-arrows-alt', 'fa-compress-arrows-alt', 'fa-arrows-alt-v', 'fa-arrows-alt-h', 'fa-arrow-up', 'fa-arrow-down', 'fa-arrow-left', 'fa-arrow-right', 'fa-arrow-circle-up', 'fa-arrow-circle-down', 'fa-arrow-circle-left', 'fa-arrow-circle-right', 'fa-chevron-up', 'fa-chevron-down', 'fa-chevron-left', 'fa-chevron-right', 'fa-angle-up', 'fa-angle-down', 'fa-angle-left', 'fa-angle-right', 'fa-caret-up', 'fa-caret-down', 'fa-caret-left', 'fa-caret-right'],
+    'Interface': ['fa-bars', 'fa-th', 'fa-th-large', 'fa-th-list', 'fa-list', 'fa-list-ul', 'fa-list-ol', 'fa-list-alt', 'fa-table', 'fa-columns', 'fa-window-maximize', 'fa-window-minimize', 'fa-window-restore', 'fa-window-close', 'fa-times-circle', 'fa-check-circle', 'fa-info-circle', 'fa-question-circle', 'fa-exclamation-circle', 'fa-exclamation-triangle', 'fa-ban', 'fa-lock', 'fa-unlock', 'fa-eye', 'fa-eye-slash', 'fa-filter', 'fa-search', 'fa-search-plus', 'fa-search-minus', 'fa-zoom-in', 'fa-zoom-out', 'fa-expand', 'fa-compress', 'fa-expand-alt', 'fa-compress-alt', 'fa-external-link', 'fa-external-link-alt', 'fa-external-link-square', 'fa-external-link-square-alt', 'fa-share', 'fa-share-alt', 'fa-share-square', 'fa-share-alt-square', 'fa-link', 'fa-unlink', 'fa-paperclip', 'fa-paper-plane', 'fa-envelope', 'fa-envelope-open', 'fa-inbox', 'fa-archive', 'fa-box', 'fa-box-open', 'fa-download', 'fa-upload', 'fa-download-alt', 'fa-upload-alt', 'fa-file-download', 'fa-file-upload', 'fa-save', 'fa-save-alt', 'fa-file', 'fa-file-alt', 'fa-file-archive', 'fa-file-code', 'fa-file-excel', 'fa-file-image', 'fa-file-pdf', 'fa-file-powerpoint', 'fa-file-video', 'fa-file-word', 'fa-folder', 'fa-folder-open', 'fa-folder-plus', 'fa-folder-minus', 'fa-folder-times', 'fa-folder-check'],
+    'Communication': ['fa-comment', 'fa-comments', 'fa-comment-alt', 'fa-comments-alt', 'fa-comment-dots', 'fa-comments-dollar', 'fa-comment-medical', 'fa-comment-slash', 'fa-comments-alt', 'fa-envelope', 'fa-envelope-open', 'fa-envelope-square', 'fa-envelope-open-text', 'fa-at', 'fa-reply', 'fa-reply-all', 'fa-forward', 'fa-share', 'fa-share-alt', 'fa-share-square', 'fa-paper-plane', 'fa-bullhorn', 'fa-megaphone', 'fa-broadcast-tower', 'fa-rss', 'fa-rss-square', 'fa-podcast', 'fa-microphone', 'fa-microphone-alt', 'fa-microphone-slash', 'fa-volume-up', 'fa-volume-down', 'fa-volume-mute', 'fa-volume-off', 'fa-headphones', 'fa-headphones-alt', 'fa-phone', 'fa-phone-alt', 'fa-phone-square', 'fa-phone-square-alt', 'fa-phone-slash', 'fa-phone-volume', 'fa-fax', 'fa-address-book', 'fa-address-card', 'fa-id-card', 'fa-id-card-alt', 'fa-user', 'fa-user-alt', 'fa-user-circle', 'fa-user-friends', 'fa-user-group', 'fa-user-plus', 'fa-user-minus', 'fa-user-times', 'fa-user-check', 'fa-user-cog', 'fa-user-edit', 'fa-user-lock', 'fa-user-shield', 'fa-user-slash', 'fa-user-tag', 'fa-user-tie', 'fa-users', 'fa-users-cog', 'fa-user-md', 'fa-user-nurse', 'fa-user-graduate', 'fa-user-astronaut', 'fa-user-injured', 'fa-user-secret', 'fa-user-ninja', 'fa-user-robot'],
+    'Médias': ['fa-image', 'fa-images', 'fa-photo-video', 'fa-camera', 'fa-camera-alt', 'fa-camera-retro', 'fa-camera-rotate', 'fa-film', 'fa-video', 'fa-video-slash', 'fa-video-plus', 'fa-video-square', 'fa-play', 'fa-pause', 'fa-stop', 'fa-forward', 'fa-backward', 'fa-step-forward', 'fa-step-backward', 'fa-fast-forward', 'fa-fast-backward', 'fa-eject', 'fa-repeat', 'fa-shuffle', 'fa-random', 'fa-music', 'fa-headphones', 'fa-headphones-alt', 'fa-microphone', 'fa-microphone-alt', 'fa-microphone-slash', 'fa-volume-up', 'fa-volume-down', 'fa-volume-mute', 'fa-volume-off', 'fa-broadcast-tower', 'fa-radio', 'fa-podcast', 'fa-rss', 'fa-rss-square', 'fa-tv', 'fa-desktop', 'fa-laptop', 'fa-tablet', 'fa-mobile', 'fa-mobile-alt', 'fa-mobile-android', 'fa-mobile-android-alt', 'fa-print', 'fa-print-alt', 'fa-scanner', 'fa-scanner-keyboard', 'fa-scanner-touchscreen', 'fa-keyboard', 'fa-mouse', 'fa-mouse-pointer', 'fa-hand-pointer', 'fa-hand-paper', 'fa-hand-rock', 'fa-hand-scissors', 'fa-hand-spock', 'fa-hand-lizard', 'fa-hand-peace', 'fa-hand-point-up', 'fa-hand-point-down', 'fa-hand-point-left', 'fa-hand-point-right', 'fa-hand-point-up', 'fa-thumbs-up', 'fa-thumbs-down', 'fa-thumbtack', 'fa-map-pin', 'fa-map-marker', 'fa-map-marker-alt', 'fa-location-arrow', 'fa-compass', 'fa-directions', 'fa-route', 'fa-sign', 'fa-traffic-light', 'fa-stop-sign', 'fa-parking', 'fa-marker', 'fa-highlighter', 'fa-pen', 'fa-pen-alt', 'fa-pen-fancy', 'fa-pen-nib', 'fa-pen-square', 'fa-pencil', 'fa-pencil-alt', 'fa-pencil-ruler', 'fa-eraser', 'fa-paint-brush', 'fa-paint-roller', 'fa-palette', 'fa-fill', 'fa-fill-drip', 'fa-brush', 'fa-spray-can', 'fa-stamp', 'fa-tint', 'fa-tint-slash', 'fa-droplet', 'fa-droplet-slash', 'fa-eye', 'fa-eye-dropper', 'fa-eye-slash', 'fa-glasses', 'fa-glasses-alt', 'fa-sunglasses', 'fa-goggles', 'fa-binoculars', 'fa-telescope', 'fa-microscope', 'fa-camera', 'fa-camera-alt', 'fa-camera-retro', 'fa-camera-rotate', 'fa-film', 'fa-video', 'fa-video-slash', 'fa-video-plus', 'fa-video-square', 'fa-photo-video', 'fa-images', 'fa-image', 'fa-portrait', 'fa-id-badge', 'fa-id-card', 'fa-id-card-alt', 'fa-address-card', 'fa-address-book', 'fa-user-circle', 'fa-user', 'fa-user-alt', 'fa-user-friends', 'fa-user-group', 'fa-user-plus', 'fa-user-minus', 'fa-user-times', 'fa-user-check', 'fa-user-cog', 'fa-user-edit', 'fa-user-lock', 'fa-user-shield', 'fa-user-slash', 'fa-user-tag', 'fa-user-tie', 'fa-users', 'fa-users-cog', 'fa-user-md', 'fa-user-nurse', 'fa-user-graduate', 'fa-user-astronaut', 'fa-user-injured', 'fa-user-secret', 'fa-user-ninja', 'fa-user-robot', 'fa-robot', 'fa-android', 'fa-apple', 'fa-windows', 'fa-linux', 'fa-chrome', 'fa-firefox', 'fa-safari', 'fa-edge', 'fa-opera', 'fa-internet-explorer', 'fa-html5', 'fa-css3', 'fa-css3-alt', 'fa-js', 'fa-js-square', 'fa-python', 'fa-java', 'fa-php', 'fa-react', 'fa-vuejs', 'fa-angular', 'fa-node', 'fa-node-js', 'fa-npm', 'fa-yarn', 'fa-git', 'fa-git-alt', 'fa-git-square', 'fa-github', 'fa-github-alt', 'fa-github-square', 'fa-gitlab', 'fa-bitbucket', 'fa-codepen', 'fa-stack-overflow', 'fa-stack-exchange', 'fa-free-code-camp', 'fa-dev', 'fa-medium', 'fa-blogger', 'fa-wordpress', 'fa-joomla', 'fa-drupal', 'fa-magento', 'fa-shopify', 'fa-woocommerce', 'fa-opencart', 'fa-prestashop', 'fa-buysellads', 'fa-cc-amazon-pay', 'fa-cc-amex', 'fa-cc-apple-pay', 'fa-cc-diners-club', 'fa-cc-discover', 'fa-cc-jcb', 'fa-cc-mastercard', 'fa-cc-paypal', 'fa-cc-stripe', 'fa-cc-visa', 'fa-amazon', 'fa-amazon-pay', 'fa-apple', 'fa-apple-pay', 'fa-google', 'fa-google-pay', 'fa-google-play', 'fa-google-wallet', 'fa-microsoft', 'fa-paypal', 'fa-shopify', 'fa-stripe', 'fa-visa', 'fa-mastercard', 'fa-amex', 'fa-discover', 'fa-diners-club', 'fa-jcb', 'fa-cc-amazon-pay', 'fa-cc-amex', 'fa-cc-apple-pay', 'fa-cc-diners-club', 'fa-cc-discover', 'fa-cc-jcb', 'fa-cc-mastercard', 'fa-cc-paypal', 'fa-cc-stripe', 'fa-cc-visa']
+  };
+
+  // Create picker content with tabs
+  let content = '<div class="emoji-picker-header">';
+  content += '<div class="emoji-tabs">';
+  content += '<button class="emoji-tab active" data-tab="emojis">😀 Emojis</button>';
+  content += '<button class="emoji-tab" data-tab="icons">🎨 Icônes</button>';
+  content += '</div>';
+  content += '<div class="emoji-search-container">';
+  content += '<input type="text" class="emoji-search" placeholder="Rechercher..." />';
+  content += '</div>';
+  content += '</div>';
   
-  // Create picker content
-  let content = '<div class="emoji-hint">💡 On Windows, press <kbd>Win</kbd> + <kbd>;</kbd> to open native emoji picker</div>';
-  content += '<div class="emoji-category">';
-  content += '<div class="emoji-grid">';
-  
-  emojis.forEach(emoji => {
-    content += `<span class="emoji-item" data-emoji="${emoji}">${emoji}</span>`;
+  // Emojis tab
+  content += '<div class="emoji-tab-content active" data-content="emojis">';
+  Object.keys(emojiCategories).forEach(category => {
+    content += `<div class="emoji-category-section" data-category="${category}">`;
+    content += `<div class="emoji-category-title">${category}</div>`;
+    content += '<div class="emoji-grid">';
+    emojiCategories[category].forEach(emoji => {
+      content += `<span class="emoji-item" data-emoji="${emoji}" title="${emoji}">${emoji}</span>`;
+    });
+    content += '</div></div>';
   });
+  content += '</div>';
   
-  content += '</div></div>';
+  // Icons tab
+  content += '<div class="emoji-tab-content" data-content="icons">';
+  Object.keys(iconCategories).forEach(category => {
+    content += `<div class="emoji-category-section" data-category="${category}">`;
+    content += `<div class="emoji-category-title">${category}</div>`;
+    content += '<div class="emoji-grid icon-grid">';
+    iconCategories[category].forEach(iconClass => {
+      const iconName = iconClass.replace('fa-', '').replace(/-/g, ' ');
+      content += `<span class="emoji-item icon-item" data-icon="${iconClass}" title="${iconName}"><i class="fa ${iconClass}"></i></span>`;
+    });
+    content += '</div></div>';
+  });
+  content += '</div>';
   
   picker.innerHTML = content;
   
@@ -808,11 +854,58 @@ function toggleEmojiPicker() {
     picker.style.left = Math.max(20, (windowWidth - pickerWidth) / 2) + 'px';
   }
   
-  // Handle emoji clicks
+  // Handle tab switching
   picker.addEventListener('click', function(e) {
-    if (e.target.classList.contains('emoji-item')) {
-      const emoji = e.target.getAttribute('data-emoji');
-      insertEmoji(emoji);
+    if (e.target.classList.contains('emoji-tab')) {
+      const tab = e.target.getAttribute('data-tab');
+      picker.querySelectorAll('.emoji-tab').forEach(t => t.classList.remove('active'));
+      picker.querySelectorAll('.emoji-tab-content').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+      picker.querySelector(`[data-content="${tab}"]`).classList.add('active');
+    }
+  });
+
+  // Handle search
+  const searchInput = picker.querySelector('.emoji-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const activeTab = picker.querySelector('.emoji-tab.active').getAttribute('data-tab');
+      const activeContent = picker.querySelector(`[data-content="${activeTab}"]`);
+      
+      activeContent.querySelectorAll('.emoji-category-section').forEach(section => {
+        const items = section.querySelectorAll('.emoji-item');
+        let hasMatch = false;
+        items.forEach(item => {
+          const emoji = item.getAttribute('data-emoji') || '';
+          const icon = item.getAttribute('data-icon') || '';
+          const title = item.getAttribute('title') || '';
+          const text = (emoji + icon + title).toLowerCase();
+          
+          if (text.includes(searchTerm)) {
+            item.style.display = 'flex';
+            hasMatch = true;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+        section.style.display = hasMatch ? 'block' : 'none';
+      });
+    });
+  }
+
+  // Handle emoji/icon clicks
+  picker.addEventListener('click', function(e) {
+    const item = e.target.closest('.emoji-item');
+    if (item) {
+      const emoji = item.getAttribute('data-emoji');
+      const icon = item.getAttribute('data-icon');
+      
+      if (emoji) {
+        insertEmoji(emoji);
+      } else if (icon) {
+        insertIcon(icon);
+      }
       picker.remove();
     }
   });
@@ -874,6 +967,72 @@ function insertEmoji(emoji) {
   
   // Insert emoji
   document.execCommand('insertText', false, emoji);
+
+  window.savedEmojiRange = null;
+  
+  // Trigger input event
+  if (noteentry) {
+    noteentry.dispatchEvent(new Event('input', {bubbles: true}));
+  }
+}
+
+function insertIcon(iconClass) {
+  // Restore selection saved when opening the picker.
+  const sel = window.getSelection();
+  try {
+    if (window.savedEmojiRange) {
+      sel.removeAllRanges();
+      sel.addRange(window.savedEmojiRange);
+    }
+  } catch (e) {}
+
+  // Ensure focus is back on the editor before inserting.
+  try {
+    if (sel && sel.rangeCount) {
+      const rangeForFocus = sel.getRangeAt(0);
+      let focusContainer = rangeForFocus.commonAncestorContainer;
+      if (focusContainer && focusContainer.nodeType === 3) focusContainer = focusContainer.parentNode;
+      const focusTarget = (focusContainer && focusContainer.closest && (focusContainer.closest('.markdown-editor') || focusContainer.closest('[contenteditable="true"]')));
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        try {
+          focusTarget.focus({ preventScroll: true });
+        } catch (e) {
+          focusTarget.focus();
+        }
+      }
+    }
+  } catch (e) {}
+
+  // Vérifier si le curseur est dans une zone éditable
+  if (!isCursorInEditableNote()) {
+    window.showCursorWarning();
+    window.savedEmojiRange = null;
+    return;
+  }
+  
+  if (!sel.rangeCount) return;
+  
+  const range = sel.getRangeAt(0);
+  let container = range.commonAncestorContainer;
+  if (container.nodeType === 3) container = container.parentNode;
+  const noteentry = container.closest && container.closest('.noteentry');
+  
+  if (!noteentry) return;
+  
+  // Insert icon as HTML
+  const iconHTML = `<i class="fa ${iconClass}"></i>`;
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = iconHTML;
+  const iconElement = tempDiv.firstElementChild;
+  
+  range.deleteContents();
+  range.insertNode(iconElement);
+  
+  // Move cursor after icon
+  range.setStartAfter(iconElement);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
 
   window.savedEmojiRange = null;
   
