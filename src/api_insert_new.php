@@ -137,4 +137,3 @@ $created_date = gmdate("Y-m-d H:i:s", $now);	// Validate workspace exists
 			'line' => $e->getLine()
 		]);
 	}
-?>

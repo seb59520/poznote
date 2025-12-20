@@ -5,4 +5,3 @@
     
     // Default timezone (will be overridden by database setting if available)
     define("DEFAULT_TIMEZONE", 'Europe/Paris');
-?>
