@@ -1026,6 +1026,29 @@ function reinitializeNoteContent() {
     if (typeof window.reinitializeCodeCopyButtons === 'function') {
         window.reinitializeCodeCopyButtons();
     }
+
+    // Initialize collapsible sections for all notes
+    if (typeof window.initializeCollapsibleSections === 'function') {
+        try {
+            const noteEntries = document.querySelectorAll('.noteentry');
+            noteEntries.forEach(function(entry) {
+                const idAttr = entry.id || '';
+                if (!idAttr) return;
+                const noteId = idAttr.replace('entry', '');
+                if (noteId) {
+                    setTimeout(function() {
+                        try {
+                            window.initializeCollapsibleSections(noteId);
+                        } catch (e) {
+                            console.error('Error initializing collapsible sections for noteId', noteId, e);
+                        }
+                    }, 50);
+                }
+            });
+        } catch (e) {
+            console.error('Error while initializing collapsible sections after AJAX load:', e);
+        }
+    }
     
     // On mobile, ensure the right column is properly displayed only when a specific note is selected
     if (isMobileDevice()) {
