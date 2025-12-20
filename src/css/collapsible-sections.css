@@ -385,5 +385,51 @@
     .collapsible-body em {
         color: #cccccc;
     }
+
+    /* Section types in dark mode */
+    .collapsible-section.section-warning {
+        border-color: #fbbf24;
+        background: #78350f;
+    }
+
+    .collapsible-section.section-warning .collapsible-header {
+        background: #78350f;
+        border-bottom-color: #fbbf24;
+    }
+
+    .collapsible-section.section-warning.expanded .collapsible-header {
+        background: #fbbf24;
+        color: #000000;
+    }
+
+    .collapsible-section.section-info {
+        border-color: #60a5fa;
+        background: #1e3a8a;
+    }
+
+    .collapsible-section.section-info .collapsible-header {
+        background: #1e3a8a;
+        border-bottom-color: #60a5fa;
+    }
+
+    .collapsible-section.section-info.expanded .collapsible-header {
+        background: #60a5fa;
+        color: #000000;
+    }
+
+    .collapsible-section.section-error {
+        border-color: #f87171;
+        background: #7f1d1d;
+    }
+
+    .collapsible-section.section-error .collapsible-header {
+        background: #7f1d1d;
+        border-bottom-color: #f87171;
+    }
+
+    .collapsible-section.section-error.expanded .collapsible-header {
+        background: #f87171;
+        color: #000000;
+    }
 }
 
