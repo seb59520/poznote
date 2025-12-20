@@ -20,11 +20,25 @@ function createNewNote() {
     
     fetch("api_insert_new.php", {
         method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", 'X-Requested-With': 'XMLHttpRequest' },
+        headers: { "Content-Type": "application/x-www-form-urlencoded", 'X-Requested-With': 'XMLHttpRequest' },
         body: params.toString()
     })
-    .then(function(response) { return response.text(); })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.text();
+    })
     .then(function(data) {
+        // Clean the response - remove any leading/trailing whitespace and PHP closing tags
+        data = data.trim();
+        // Remove any PHP closing tag that might be at the start
+        data = data.replace(/^<\?php\s*/i, '').replace(/^\?\>\s*/i, '');
+        
+        if (!data) {
+            throw new Error('Empty response from server');
+        }
+        
         try {
             var res = JSON.parse(data);
             if(res.status === 1) {
@@ -35,10 +49,13 @@ function createNewNote() {
                 showNotificationPopup(res.error || 'Error creating note', 'error');
             }
         } catch(e) {
-            showNotificationPopup('Error creating note: ' + data, 'error');
+            console.error('JSON parse error:', e);
+            console.error('Response data:', data);
+            showNotificationPopup('Error parsing response: ' + (data.substring(0, 100) || 'Empty response'), 'error');
         }
     })
     .catch(function(error) {
+        console.error('Network error:', error);
         showNotificationPopup('Network error: ' + error.message, 'error');
     });
 }

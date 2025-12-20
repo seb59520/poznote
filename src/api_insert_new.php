@@ -1,4 +1,7 @@
 <?php
+	// Set headers first, before any includes
+	header('Content-Type: application/json; charset=utf-8');
+	
 	require 'auth.php';
 	requireAuth();
 	
@@ -107,12 +110,13 @@ $created_date = gmdate("Y-m-d H:i:s", $now);	// Validate workspace exists
 
 		if ($isAjax) {
 			// Return JSON for fetch/AJAX clients
-			header('Content-Type: application/json; charset=utf-8');
+			// Header already set at the top
 			echo json_encode([
 				'status' => 1,
 				'heading' => $uniqueTitle,
 				'id' => $id
 			]);
+			exit;
 		} else {
 			// If opened directly in browser, redirect to the editor/view for the new note
 			$redirectUrl = 'index.php?note=' . urlencode($id);
@@ -120,15 +124,17 @@ $created_date = gmdate("Y-m-d H:i:s", $now);	// Validate workspace exists
 			exit;
 		}
 	} else {
-		header('Content-Type: application/json; charset=utf-8');
+		// Header already set at the top
+		http_response_code(500);
 		echo json_encode([
 			'status' => 0,
 			'error' => 'Database error: ' . $stmt->errorInfo()[2]
 		]);
+		exit;
 	}
 	
 	} catch (Exception $e) {
-		header('Content-Type: application/json; charset=utf-8');
+		// Header already set at the top
 		http_response_code(500);
 		echo json_encode([
 			'status' => 0,
@@ -136,4 +142,5 @@ $created_date = gmdate("Y-m-d H:i:s", $now);	// Validate workspace exists
 			'file' => $e->getFile(),
 			'line' => $e->getLine()
 		]);
+		exit;
 	}
