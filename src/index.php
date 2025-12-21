@@ -1156,6 +1156,7 @@ $body_classes = trim($extra_body_classes);
 <script src="js/slash-command.js?v=<?php echo $v; ?>"></script>
 <script src="js/share.js"></script>
 <script src="js/folder-hierarchy.js?v=<?php echo $v; ?>"></script>
+<script src="js/folder-manager.js?v=<?php echo $v; ?>"></script>
 <script src="js/main.js"></script>
 <script src="js/resize-column.js"></script>
 <script src="js/unified-search.js"></script>
