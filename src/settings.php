@@ -65,7 +65,7 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
             <!-- Folder Manager -->
             <div class="settings-card" onclick="openFolderManager();">
                 <div class="settings-card-icon">
-                    <i class="fa-folder-tree"></i>
+                    <i class="fa-sitemap"></i>
                 </div>
                 <div class="settings-card-content">
                     <h3>Gestion des Dossiers</h3>
