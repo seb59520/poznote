@@ -124,9 +124,17 @@ try {
         name TEXT NOT NULL,
         workspace TEXT DEFAULT "Poznote",
         parent_id INTEGER DEFAULT NULL,
+        display_order INTEGER DEFAULT 0,
         created DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (parent_id) REFERENCES folders(id) ON DELETE CASCADE
     )');
+    
+    // Add display_order column if it doesn't exist (migration)
+    try {
+        $con->exec('ALTER TABLE folders ADD COLUMN display_order INTEGER DEFAULT 0');
+    } catch (PDOException $e) {
+        // Column already exists, ignore
+    }
 
     // Ensure unique folder names per workspace and parent
     // For subfolders (parent_id IS NOT NULL): same name allowed in different parents

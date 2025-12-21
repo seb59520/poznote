@@ -32,6 +32,7 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
     <link rel="stylesheet" href="css/settings.css">
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/folder-manager.css">
 </head>
 
 <body>
@@ -58,6 +59,17 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
                 </div>
                 <div class="settings-card-content">
                     <h3>Workspaces</h3>
+                </div>
+            </div>
+
+            <!-- Folder Manager -->
+            <div class="settings-card" onclick="openFolderManager();">
+                <div class="settings-card-icon">
+                    <i class="fa-folder-tree"></i>
+                </div>
+                <div class="settings-card-content">
+                    <h3>Gestion des Dossiers</h3>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Réorganiser l'ordre et les dépendances</p>
                 </div>
             </div>
                         
@@ -185,6 +197,7 @@ $note_id = isset($_GET['note']) ? intval($_GET['note']) : null;
     <script src="js/utils.js"></script>
     <script src="js/font-size-settings.js"></script>
     <script src="js/ai-settings.js"></script>
+    <script src="js/folder-manager.js"></script>
     
     <script>
         // Update Back to Notes link with workspace from localStorage

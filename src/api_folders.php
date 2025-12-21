@@ -409,11 +409,11 @@ switch($action) {
     case 'list':
         $hierarchical = isset($_POST['hierarchical']) && $_POST['hierarchical'] === 'true';
         
-        $query = "SELECT id, name, parent_id FROM folders";
+        $query = "SELECT id, name, parent_id, display_order FROM folders";
         if ($workspace !== null) {
             $query .= " WHERE (workspace = '" . addslashes($workspace) . "' OR (workspace IS NULL AND '" . addslashes($workspace) . "' = 'Poznote'))";
         }
-        $query .= " ORDER BY name";
+        $query .= " ORDER BY display_order ASC, name ASC";
         
         $result = $con->query($query);
         
@@ -424,7 +424,8 @@ switch($action) {
             $folders[] = [
                 'id' => (int)$row['id'],
                 'name' => $row['name'],
-                'parent_id' => $row['parent_id'] ? (int)$row['parent_id'] : null
+                'parent_id' => $row['parent_id'] ? (int)$row['parent_id'] : null,
+                'display_order' => isset($row['display_order']) ? (int)$row['display_order'] : 0
             ];
         }
         
@@ -432,8 +433,11 @@ switch($action) {
             // Build hierarchical structure
             $folders = buildFolderHierarchy($folders);
         } else {
-            // Sort folders alphabetically
+            // Sort folders by display_order then alphabetically
             usort($folders, function($a, $b) {
+                if ($a['display_order'] != $b['display_order']) {
+                    return $a['display_order'] - $b['display_order'];
+                }
                 return strcasecmp($a['name'], $b['name']);
             });
         }
@@ -881,6 +885,63 @@ switch($action) {
         } catch (Exception $e) {
             error_log("Remove from folder error: " . $e->getMessage());
             echo json_encode(['success' => false, 'error' => 'Internal server error: ' . $e->getMessage()]);
+        }
+        break;
+        
+    case 'update_order':
+        try {
+            $foldersData = $_POST['folders'] ?? '';
+            if (empty($foldersData)) {
+                echo json_encode(['success' => false, 'error' => 'Folders data is required']);
+                exit;
+            }
+            
+            $folders = json_decode($foldersData, true);
+            if (!is_array($folders)) {
+                echo json_encode(['success' => false, 'error' => 'Invalid folders data format']);
+                exit;
+            }
+            
+            // Start transaction
+            $con->beginTransaction();
+            
+            try {
+                foreach ($folders as $folderData) {
+                    $folderId = isset($folderData['id']) ? (int)$folderData['id'] : 0;
+                    $parentId = isset($folderData['parent_id']) && $folderData['parent_id'] !== null ? (int)$folderData['parent_id'] : null;
+                    $displayOrder = isset($folderData['display_order']) ? (int)$folderData['display_order'] : 0;
+                    
+                    if ($folderId <= 0) continue;
+                    
+                    // Prevent circular dependencies
+                    if ($parentId) {
+                        $checkCircular = $con->prepare("SELECT parent_id FROM folders WHERE id = ?");
+                        $checkCircular->execute([$parentId]);
+                        $parentParent = $checkCircular->fetchColumn();
+                        if ($parentParent == $folderId) {
+                            throw new Exception("Circular dependency detected");
+                        }
+                    }
+                    
+                    // Update folder parent_id and display_order
+                    if ($workspace !== null) {
+                        $stmt = $con->prepare("UPDATE folders SET parent_id = ?, display_order = ? WHERE id = ? AND (workspace = ? OR (workspace IS NULL AND ? = 'Poznote'))");
+                        $stmt->execute([$parentId, $displayOrder, $folderId, $workspace, $workspace]);
+                    } else {
+                        $stmt = $con->prepare("UPDATE folders SET parent_id = ?, display_order = ? WHERE id = ?");
+                        $stmt->execute([$parentId, $displayOrder, $folderId]);
+                    }
+                }
+                
+                $con->commit();
+                echo json_encode(['success' => true, 'message' => 'Folder order updated successfully']);
+            } catch (Exception $e) {
+                $con->rollBack();
+                throw $e;
+            }
+        } catch (Exception $e) {
+            error_log("Update folder order error: " . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Error updating folder order: ' . $e->getMessage()]);
         }
         break;
         
