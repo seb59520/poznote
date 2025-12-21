@@ -3309,8 +3309,25 @@ input[type="search"]::-webkit-search-results-decoration {
     color: #000;
 }
 
+html[data-theme='dark'] .emoji-tab,
+body.dark-mode .emoji-tab {
+    color: #9ca3af;
+}
+
+html[data-theme='dark'] .emoji-tab:hover,
+body.dark-mode .emoji-tab:hover {
+    background: #374151;
+    color: #f9fafb;
+}
+
 .emoji-tab.active {
     background: #007bff;
+    color: white;
+}
+
+html[data-theme='dark'] .emoji-tab.active,
+body.dark-mode .emoji-tab.active {
+    background: #3b82f6;
     color: white;
 }
 
@@ -3325,6 +3342,15 @@ input[type="search"]::-webkit-search-results-decoration {
     border-radius: 6px;
     font-size: 14px;
     box-sizing: border-box;
+    background: white;
+    color: #111827;
+}
+
+html[data-theme='dark'] .emoji-search,
+body.dark-mode .emoji-search {
+    background: #111827;
+    border-color: #374151;
+    color: #f9fafb;
 }
 
 .emoji-search:focus {
@@ -3333,11 +3359,23 @@ input[type="search"]::-webkit-search-results-decoration {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+html[data-theme='dark'] .emoji-search:focus,
+body.dark-mode .emoji-search:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
 .emoji-tab-content {
     display: none;
     overflow-y: auto;
     max-height: 500px;
     padding: 10px;
+    background: white;
+}
+
+html[data-theme='dark'] .emoji-tab-content,
+body.dark-mode .emoji-tab-content {
+    background: #1f2937;
 }
 
 .emoji-tab-content.active {
@@ -3355,6 +3393,11 @@ input[type="search"]::-webkit-search-results-decoration {
     text-transform: uppercase;
     margin-bottom: 10px;
     padding: 0 5px;
+}
+
+html[data-theme='dark'] .emoji-category-title,
+body.dark-mode .emoji-category-title {
+    color: #9ca3af;
 }
 
 .emoji-hint {
@@ -3426,10 +3469,25 @@ input[type="search"]::-webkit-search-results-decoration {
     color: inherit;
 }
 
+html[data-theme='dark'] .emoji-item.icon-item,
+body.dark-mode .emoji-item.icon-item {
+    color: #d1d5db;
+}
+
+html[data-theme='dark'] .emoji-item.icon-item i,
+body.dark-mode .emoji-item.icon-item i {
+    color: #d1d5db;
+}
+
 .emoji-item:hover {
     background-color: #e3f2fd;
     transform: scale(1.15);
     z-index: 1;
+}
+
+html[data-theme='dark'] .emoji-item:hover,
+body.dark-mode .emoji-item:hover {
+    background-color: #1e3a8a;
 }
 
 .emoji-item.icon-item:hover {
@@ -3437,8 +3495,19 @@ input[type="search"]::-webkit-search-results-decoration {
     color: #007bff;
 }
 
+html[data-theme='dark'] .emoji-item.icon-item:hover,
+body.dark-mode .emoji-item.icon-item:hover {
+    background-color: #1e3a8a;
+    color: #60a5fa;
+}
+
 .emoji-item.icon-item:hover i {
     color: #007bff;
+}
+
+html[data-theme='dark'] .emoji-item.icon-item:hover i,
+body.dark-mode .emoji-item.icon-item:hover i {
+    color: #60a5fa;
 }
 
 .emoji-item:active {

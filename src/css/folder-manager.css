@@ -254,89 +254,105 @@
 /* Dark mode support - based on data-theme attribute */
 html[data-theme='dark'] .folder-manager-modal-content,
 body.dark-mode .folder-manager-modal-content {
-    .folder-manager-modal-content {
-        background: #1f2937;
-    }
+    background: #1f2937;
+}
 
-    .folder-manager-modal-header {
-        background: #111827;
-        border-bottom-color: #374151;
-    }
+html[data-theme='dark'] .folder-manager-modal-header,
+body.dark-mode .folder-manager-modal-header {
+    background: #111827;
+    border-bottom-color: #374151;
+}
 
-    .folder-manager-modal-header h2 {
-        color: #f9fafb;
-    }
+html[data-theme='dark'] .folder-manager-modal-header h2,
+body.dark-mode .folder-manager-modal-header h2 {
+    color: #f9fafb;
+}
 
-    .folder-manager-close {
-        color: #9ca3af;
-    }
+html[data-theme='dark'] .folder-manager-close,
+body.dark-mode .folder-manager-close {
+    color: #9ca3af;
+}
 
-    .folder-manager-close:hover {
-        background: #374151;
-        color: #f9fafb;
-    }
+html[data-theme='dark'] .folder-manager-close:hover,
+body.dark-mode .folder-manager-close:hover {
+    background: #374151;
+    color: #f9fafb;
+}
 
-    .folder-manager-modal-body {
-        background: #1f2937;
-    }
+html[data-theme='dark'] .folder-manager-modal-body,
+body.dark-mode .folder-manager-modal-body {
+    background: #1f2937;
+}
 
-    .folder-manager-info {
-        background: #1e3a8a;
-        border-left-color: #60a5fa;
-        color: #bfdbfe;
-    }
+html[data-theme='dark'] .folder-manager-info,
+body.dark-mode .folder-manager-info {
+    background: #1e3a8a;
+    border-left-color: #60a5fa;
+    color: #bfdbfe;
+}
 
-    .folder-manager-item {
-        background: #111827;
-        border-color: #374151;
-    }
+html[data-theme='dark'] .folder-manager-item,
+body.dark-mode .folder-manager-item {
+    background: #111827;
+    border-color: #374151;
+}
 
-    .folder-manager-item:hover {
-        border-color: #60a5fa;
-    }
+html[data-theme='dark'] .folder-manager-item:hover,
+body.dark-mode .folder-manager-item:hover {
+    border-color: #60a5fa;
+}
 
-    .folder-manager-item-info .folder-name {
-        color: #f9fafb;
-    }
+html[data-theme='dark'] .folder-manager-item-info .folder-name,
+body.dark-mode .folder-manager-item-info .folder-name {
+    color: #f9fafb;
+}
 
-    .folder-parent-select {
-        background: #111827;
-        border-color: #374151;
-        color: #f9fafb;
-    }
+html[data-theme='dark'] .folder-parent-select,
+body.dark-mode .folder-parent-select {
+    background: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+}
 
-    .folder-parent-select:hover {
-        border-color: #60a5fa;
-    }
+html[data-theme='dark'] .folder-parent-select:hover,
+body.dark-mode .folder-parent-select:hover {
+    border-color: #60a5fa;
+}
 
-    .folder-btn-move-up,
-    .folder-btn-move-down {
-        background: #111827;
-        border-color: #374151;
-        color: #9ca3af;
-    }
+html[data-theme='dark'] .folder-btn-move-up,
+html[data-theme='dark'] .folder-btn-move-down,
+body.dark-mode .folder-btn-move-up,
+body.dark-mode .folder-btn-move-down {
+    background: #111827;
+    border-color: #374151;
+    color: #9ca3af;
+}
 
-    .folder-btn-move-up:hover:not(:disabled),
-    .folder-btn-move-down:hover:not(:disabled) {
-        background: #60a5fa;
-        border-color: #60a5fa;
-        color: #ffffff;
-    }
+html[data-theme='dark'] .folder-btn-move-up:hover:not(:disabled),
+html[data-theme='dark'] .folder-btn-move-down:hover:not(:disabled),
+body.dark-mode .folder-btn-move-up:hover:not(:disabled),
+body.dark-mode .folder-btn-move-down:hover:not(:disabled) {
+    background: #60a5fa;
+    border-color: #60a5fa;
+    color: #ffffff;
+}
 
-    .folder-manager-modal-footer {
-        background: #111827;
-        border-top-color: #374151;
-    }
+html[data-theme='dark'] .folder-manager-modal-footer,
+body.dark-mode .folder-manager-modal-footer {
+    background: #111827;
+    border-top-color: #374151;
+}
 
-    .btn-secondary {
-        background: #374151;
-        color: #f9fafb;
-        border-color: #4b5563;
-    }
+html[data-theme='dark'] .btn-secondary,
+body.dark-mode .btn-secondary {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
 
-    .btn-secondary:hover {
-        background: #4b5563;
-    }
+html[data-theme='dark'] .btn-secondary:hover,
+body.dark-mode .btn-secondary:hover {
+    background: #4b5563;
 }
 
 /* Mobile responsive */
