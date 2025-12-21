@@ -3423,6 +3423,7 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .emoji-item.icon-item i {
     font-size: 18px;
+    color: inherit;
 }
 
 .emoji-item:hover {
@@ -3433,6 +3434,10 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .emoji-item.icon-item:hover {
     background-color: #e3f2fd;
+    color: #007bff;
+}
+
+.emoji-item.icon-item:hover i {
     color: #007bff;
 }
 

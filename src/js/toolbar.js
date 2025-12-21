@@ -763,7 +763,7 @@ function toggleEmojiPicker() {
     content += '<div class="emoji-grid icon-grid">';
     iconCategories[category].forEach(iconClass => {
       const iconName = iconClass.replace('fa-', '').replace(/-/g, ' ');
-      content += `<span class="emoji-item icon-item" data-icon="${iconClass}" title="${iconName}"><i class="fa ${iconClass}"></i></span>`;
+      content += `<span class="emoji-item icon-item" data-icon="${iconClass}" title="${iconName}"><i class="fas ${iconClass}"></i></span>`;
     });
     content += '</div></div>';
   });
